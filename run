@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. util/funcs
+
+cleanC; compileC && testC

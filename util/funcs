@@ -1,0 +1,28 @@
+#!/bin/bash
+
+cp="pascal/src/compiler"
+cup="lib/java-cup-11a.jar"
+
+cleanC() { 
+    rm $cp/lexanal/PascalLex.java
+    rm $cp/lexanal/*~
+    rm $cp/lexanal/*.class 
+    rm $cp/report/*.class 
+    rm $cp/synanal/*.class 
+    rm $cp/*~
+    rm $cp/*.class 
+}
+compileC() { jflex $cp/lexanal/pascal.jflex && javac -cp $cup:$cp/. $cp/report/*.java $cp/lexanal/*.java $cp/synanal/*.java $cp/Main.java; }
+testC() {
+    cd util
+    fsc lexanal.scala
+    cd ..
+    progs="`echo test/*.pascal`"
+    for i in $(echo $progs | tr " " "\n")
+    do
+        echo `basename $i`        
+        java -cp $cup:$cp/.. compiler.Main ${i%.*}
+        if [ $? -ne "0" ]; then exit; fi
+        scala -cp util lexanal lexanal.xml
+    done
+}

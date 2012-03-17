@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. util/funcs
+
+cleanC; rm packs/63060270-$1.zip; zip -r packs/63060270-$1.zip pascal
