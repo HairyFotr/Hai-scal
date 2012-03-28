@@ -1,0 +1,105 @@
+package compiler.synanal;
+
+import java_cup.runtime.*;
+
+import compiler.report.*;
+
+parser code
+{:
+        public void syntax_error(Symbol cur_token) {
+            Report.warning ("Syntax error near word '" + (String)(cur_token.value) + "'.", cur_token.left, cur_token.right);
+        }
+        
+        public void report_error(String message, Object info) {
+        }
+        
+        public void report_fatal_error(String message, Object info) throws Exception {
+        	throw new Exception(message);
+        }
+:}
+
+terminal String BOOL_CONST, CHAR_CONST, INT_CONST, NIL;
+terminal String IDENTIFIER;
+
+terminal BOOL, CHAR, INT;
+terminal COLON, COMMA, DOT, DOTS, LBRACKET, LPARENTHESIS, RBRACKET, RPARENTHESIS, SEMIC;
+terminal ADD, AND, DIV, EQU, GEQ, GTH, LEQ, LTH, MEM, MUL, NEQ, NOT, OR, PTR, SUB, UADD, USUB, VAL;
+terminal ARRAY, ASSIGN, BEGIN, CONST, DO, ELSE, END, FOR, FUNCTION, IF, OF, PROCEDURE, PROGRAM, RECORD, THEN, TO, TYPE, VAR, WHILE;
+
+non terminal source;
+non terminal program, constdec_opt, typedec_opt, vardec_opt, funcproc_opt, main_block;
+
+non terminal const_declarations, const_declaration, value;
+non terminal type_declarations, type_declaration, type;
+non terminal var_declarations, var_declaration;
+non terminal record, array;
+
+non terminal func, proc, parameters, parameters_call, value_list, var_declarations2, var_declaration2;
+
+non terminal block_beginend, block, bblock;
+
+start with source;
+
+source ::= program constdec_opt typedec_opt vardec_opt funcproc_opt main_block;
+
+program ::= PROGRAM IDENTIFIER SEMIC;
+
+constdec_opt ::= | CONST const_declarations;
+    const_declarations ::= const_declaration | const_declaration const_declarations;
+    const_declaration ::= IDENTIFIER ASSIGN value SEMIC;
+    value ::= BOOL_CONST | CHAR_CONST | INT_CONST | NIL 
+            | PTR value | ADD value | SUB value | NOT value 
+            | value PTR
+            | value MUL value | value DIV value 
+            | value ADD value | value SUB value
+            | value EQU value | value NEQ value
+            | value GEQ value | value LEQ value
+            | value GTH value | value LTH value
+            | value AND value | value OR value
+            | value LBRACKET value RBRACKET
+            | value DOT value
+            | IDENTIFIER parameters_call
+            | LBRACKET type RBRACKET
+            | LPARENTHESIS value RPARENTHESIS
+            | IDENTIFIER;
+    parameters_call ::= LPARENTHESIS value_list RPARENTHESIS;
+    value_list ::= | value COMMA value | value;
+
+typedec_opt ::= | TYPE type_declarations;
+    type_declarations ::= type_declaration | type_declaration type_declarations;
+    type_declaration ::= IDENTIFIER EQU type SEMIC;
+    type ::= BOOL | CHAR | INT | record | array | PTR type | LPARENTHESIS type RPARENTHESIS;
+    
+    array ::= ARRAY LBRACKET value DOTS value RBRACKET OF type;
+    record ::= RECORD var_declarations END;
+
+vardec_opt ::= | VAR var_declarations;
+    var_declarations ::= var_declaration | var_declaration var_declarations;
+    var_declaration ::= IDENTIFIER COLON type SEMIC;
+
+funcproc_opt ::= | func funcproc_opt | proc funcproc_opt;
+    func ::= FUNCTION parameters COLON type SEMIC constdec_opt typedec_opt vardec_opt block_beginend SEMIC;
+    proc ::= PROCEDURE parameters SEMIC constdec_opt typedec_opt vardec_opt block_beginend SEMIC;
+    parameters ::= LPARENTHESIS var_declarations2 RPARENTHESIS;
+    var_declarations2 ::= | var_declaration2 | var_declaration2 SEMIC var_declarations2;
+    var_declaration2 ::= IDENTIFIER COLON type;
+    
+main_block ::= block_beginend DOT;
+
+block_beginend ::= BEGIN block END;
+block ::= | bblock SEMIC block;
+bblock ::= | block_beginend
+    | value
+    | value ASSIGN value
+    | IF value THEN block
+    | IF value THEN block ELSE block
+    | WHILE value DO block
+    | FOR IDENTIFIER ASSIGN value TO value DO block;
+    
+    
+    
+    
+    
+    
+    
+    

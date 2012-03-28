@@ -1,28 +1,80 @@
 #!/bin/bash
 
 cp="pascal/src/compiler"
-cup="lib/java-cup-11a.jar"
+cup="pascal/src/java_cup/runtime"
+cup2="lib/java-cup-11a.jar"
 
-cleanC() { 
-    rm $cp/lexanal/PascalLex.java
-    rm $cp/lexanal/*~
-    rm $cp/lexanal/*.class 
-    rm $cp/report/*.class 
-    rm $cp/synanal/*.class 
-    rm $cp/*~
-    rm $cp/*.class 
+cleanAll() { 
+    rm *~ 2> /dev/null
+    rm $cp/lexanal/PascalLex.java 2> /dev/null
+    rm $cp/lexanal/*~ 2> /dev/null
+    rm $cp/lexanal/*.class 2> /dev/null
+    rm $cp/synanal/PascalSyn.java 2> /dev/null
+    rm $cp/synanal/PascalTok.java 2> /dev/null
+    rm $cp/synanal/*~ 2> /dev/null
+    rm $cp/synanal/*.class 2> /dev/null
+    rm $cp/report/*.class 2> /dev/null
+    rm $cp/*~ 2> /dev/null
+    rm $cp/*.class 2> /dev/null
+    rm $cup/*.class 2> /dev/null
+    rm .compiled*  2> /dev/null
 }
-compileC() { jflex $cp/lexanal/pascal.jflex && javac -cp $cup:$cp/. $cp/report/*.java $cp/lexanal/*.java $cp/synanal/*.java $cp/Main.java; }
+cleanC() { 
+    rm $cp/lexanal/*~ 2> /dev/null
+    rm $cp/lexanal/*.class 2> /dev/null
+    rm $cp/report/*.class 2> /dev/null
+    rm $cp/synanal/*.class 2> /dev/null
+    rm $cp/*~ 2> /dev/null
+    rm $cp/*.class 2> /dev/null
+    rm $cup/*.class 2> /dev/null
+}
+compileC() { 
+    { 
+        if [[ ! -e .compiledflex || ! -e $cp/lexanal/PascalLex.java || "$flags" == "-f" || `stat -c %Y .compiledflex` < `stat -c %Y $cp/lexanal/pascal.jflex` ]]
+        then 
+            rm $cp/lexanal/PascalLex.java 2> /dev/null
+            jflex $cp/lexanal/pascal.jflex
+            touch .compiledflex
+            echo
+        fi;
+    } && {
+        if [[ ! -e .compiledcup || ! -e $cp/synanal/PascalSyn.java || ! -e $cp/synanal/PascalTok.java || "$flags" == "-f" || `stat -c %Y .compiledcup` < `stat -c %Y $cp/synanal/pascal.cup` ]]
+        then 
+            rm $cp/lexanal/PascalSyn.java 2> /dev/null
+            rm $cp/lexanal/PascalTok.java 2> /dev/null
+            java -jar $cup2 -package synanal -parser PascalSyn -symbols PascalTok -nonterms -expect 331 $cp/synanal/pascal.cup 
+            if [ "$?" -ne "0"  ]
+            then
+                exit
+            fi
+            mv PascalSyn.java $cp/synanal
+            mv PascalTok.java $cp/synanal
+            touch .compiledcup
+            echo
+        fi;
+    } && {
+        javac -cp $cup:$cup2:$cp/. $cup/*.java $cp/report/*.java $cp/lexanal/*.java $cp/Main.java $cp/synanal/*.java;
+    }
+}
 testC() {
-    cd util
-    fsc lexanal.scala
-    cd ..
+    if [[ ! -e .compiledscala || ! -e util/xmlAnal.class || "$flags" == "-f" || `stat -c %Y .compiledscala` < `stat -c %Y util/xmlAnal.scala` ]]
+    then
+        cd util
+        scalac xmlAnal.scala
+        cd ..
+        touch .compiledscala
+        echo "Compiled xmlAnal.scala"
+        echo
+    fi
     progs="`echo test/*.pascal`"
     for i in $(echo $progs | tr " " "\n")
     do
-        echo `basename $i`        
-        java -cp $cup:$cp/.. compiler.Main ${i%.*}
+        echo `basename $i`
+        cd pascal/src
+        #java -cp $cp/synanal:$cup:$cup2:$cp/.. compiler.Main ${i%.*}
+        java compiler.Main ../../${i%.*}
         if [ $? -ne "0" ]; then exit; fi
-        scala -cp util lexanal lexanal.xml
+        cd ../..
+        #scala -cp util xmlAnal
     done
 }

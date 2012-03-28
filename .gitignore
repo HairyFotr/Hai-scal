@@ -2,4 +2,9 @@
 *.class
 *.xml
 *.zip
+.compiled*
+packs/*
+
 pascal\src\compiler\lexanal\PascalLex.java
+pascal\src\compiler\synanal\PascalSym.java
+pascal\src\compiler\synanal\PascalTok.java

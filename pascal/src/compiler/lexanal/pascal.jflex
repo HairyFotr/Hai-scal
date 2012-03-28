@@ -54,10 +54,9 @@ import compiler.synanal.*;
 <YYINITIAL> {
 [ \n\t]+ { }
 
-''' { ReportWarning(); }
-''''|'[ -~]'|'' { return sym(PascalTok.CHAR_CONST); }
+''''|'[^']' { return sym(PascalTok.CHAR_CONST); }
 
-// če bom razvil še kak dodaten feature :)
+// ce bom razvil se kak dodaten feature :)
 "{$EXTENDED}" { System.out.println(":-) Using extended features."); extendedPascal = true; }
 
 "{" { commentNesting++; yybegin(COMMENT); }
@@ -68,15 +67,19 @@ import compiler.synanal.*;
 
 
 "boolean"   { return sym(PascalTok.BOOL); }
-"character" { return sym(PascalTok.CHAR); }
+"char"      { return sym(PascalTok.CHAR); }
 "integer"   { return sym(PascalTok.INT); }
 "var"    { return sym(PascalTok.VAR); }
 "const"  { return sym(PascalTok.CONST); }
 "record" { return sym(PascalTok.RECORD); }
 "array"  { return sym(PascalTok.ARRAY); }
-"..."    { return sym(PascalTok.DOTS); }
+".."    { return sym(PascalTok.DOTS); }
 "of"     { return sym(PascalTok.OF); }
 "type"   { return sym(PascalTok.TYPE); }
+
+"and"  { return sym(PascalTok.AND); }
+"or"  { return sym(PascalTok.OR); }
+"not"  { return sym(PascalTok.NOT); }
 
 "begin" { blockNesting++; return sym(PascalTok.BEGIN); }
 "end"   { blockNesting--; if(blockNesting < 0) Report.warning("There is no block to end here. "+GetOutputString()); return sym(PascalTok.END); }
@@ -87,12 +90,13 @@ import compiler.synanal.*;
 "to"    { return sym(PascalTok.TO); }
 "do"    { return sym(PascalTok.DO); }
 "while" { return sym(PascalTok.WHILE); }
+"div"  { return sym(PascalTok.DIV); }
 
 "procedure" { return sym(PascalTok.PROCEDURE); }
 "function"  { return sym(PascalTok.FUNCTION); }
 "program"   { return sym(PascalTok.PROGRAM); }
 
-[a-zA-Z][a-zA-Z0-9_-]* { return sym(PascalTok.IDENTIFIER); }
+[a-zA-Z][a-zA-Z0-9_]* { return sym(PascalTok.IDENTIFIER); }
 
 ":"  { return sym(PascalTok.COLON); }
 ","  { return sym(PascalTok.COMMA); }
@@ -101,12 +105,9 @@ import compiler.synanal.*;
 "("  { return sym(PascalTok.LPARENTHESIS); }
 ")"  { return sym(PascalTok.RPARENTHESIS); }
 "]"  { return sym(PascalTok.RBRACKET); }
-"!"  { return sym(PascalTok.NOT); }
 "*"  { return sym(PascalTok.MUL); }
 "+"  { return sym(PascalTok.ADD); }
 "-"  { return sym(PascalTok.SUB); }
-"&"  { return sym(PascalTok.SUB); }
-"/"  { return sym(PascalTok.DIV); }
 ":=" { return sym(PascalTok.ASSIGN); }
 ">=" { return sym(PascalTok.GEQ); }  
 "<=" { return sym(PascalTok.LEQ); }
