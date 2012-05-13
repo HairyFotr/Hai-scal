@@ -3,6 +3,8 @@
 cp="pascal/src/compiler"
 cup="pascal/src/java_cup/runtime"
 cup2="lib/java-cup-11a.jar"
+abs="pascal/src/compiler/abstree"
+sem="pascal/src/compiler/semanal"
 
 cleanAll() { 
     rm *~ 2> /dev/null
@@ -13,11 +15,20 @@ cleanAll() {
     rm $cp/synanal/PascalTok.java 2> /dev/null
     rm $cp/synanal/*~ 2> /dev/null
     rm $cp/synanal/*.class 2> /dev/null
+    rm $cp/semanal/*~ 2> /dev/null
+    rm $cp/semanal/*.class 2> /dev/null
+    rm $cp/semanal/type/*.class 2> /dev/null
     rm $cp/report/*.class 2> /dev/null
     rm $cp/*~ 2> /dev/null
     rm $cp/*.class 2> /dev/null
     rm $cup/*.class 2> /dev/null
+    rm $abs/*.class 2> /dev/null
+    rm $abs/tree/*.class 2> /dev/null
+    rm $sem/*.class 2> /dev/null
+    rm $sem/type/*.class 2> /dev/null
     rm .compiled*  2> /dev/null
+    rm pascal/src/*.xml
+    rm pascal/*.xml
 }
 cleanC() { 
     rm $cp/lexanal/*~ 2> /dev/null
@@ -27,22 +38,18 @@ cleanC() {
     rm $cp/*~ 2> /dev/null
     rm $cp/*.class 2> /dev/null
     rm $cup/*.class 2> /dev/null
+    rm $abs/*.class 2> /dev/null
+    rm $abs/tree/*.class 2> /dev/null
+    rm $sem/*.class 2> /dev/null
+    rm $sem/type/*.class 2> /dev/null
 }
 compileC() { 
-    { 
-        if [[ ! -e .compiledflex || ! -e $cp/lexanal/PascalLex.java || "$flags" == "-f" || `stat -c %Y .compiledflex` < `stat -c %Y $cp/lexanal/pascal.jflex` ]]
-        then 
-            rm $cp/lexanal/PascalLex.java 2> /dev/null
-            jflex $cp/lexanal/pascal.jflex
-            touch .compiledflex
-            echo
-        fi;
-    } && {
+    {
         if [[ ! -e .compiledcup || ! -e $cp/synanal/PascalSyn.java || ! -e $cp/synanal/PascalTok.java || "$flags" == "-f" || `stat -c %Y .compiledcup` < `stat -c %Y $cp/synanal/pascal.cup` ]]
         then 
             rm $cp/lexanal/PascalSyn.java 2> /dev/null
             rm $cp/lexanal/PascalTok.java 2> /dev/null
-            java -jar $cup2 -package synanal -parser PascalSyn -symbols PascalTok -nonterms -expect 331 $cp/synanal/pascal.cup 
+            java -jar $cup2 -package synanal -parser PascalSyn -symbols PascalTok -nonterms -expect 1 $cp/synanal/pascal.cup 
             if [ "$?" -ne "0"  ]
             then
                 exit
@@ -52,21 +59,33 @@ compileC() {
             touch .compiledcup
             echo
         fi;
+    } && { 
+        if [[ ! -e .compiledflex || ! -e $cp/lexanal/PascalLex.java || "$flags" == "-f" || `stat -c %Y .compiledflex` < `stat -c %Y $cp/lexanal/pascal.jflex` ]]
+        then 
+            rm $cp/lexanal/PascalLex.java 2> /dev/null
+            jflex $cp/lexanal/pascal.jflex
+            touch .compiledflex
+            if [ "$?" -ne "0"  ]
+            then
+                exit
+            fi
+            echo
+        fi;
     } && {
-        javac -cp $cup:$cup2:$cp/. $cup/*.java $cp/report/*.java $cp/lexanal/*.java $cp/Main.java $cp/synanal/*.java;
+        javac -cp $cup:$cup2:$cp/:$abs:$abs/tree:$sem:$sem/type:. $cup/*.java $cp/report/*.java $cp/lexanal/*.java $abs/*.java $abs/tree/*.java $cp/synanal/*.java $sem/type/*.java $sem/*.java  $cp/Main.java;
     }
 }
 testC() {
-    if [[ ! -e .compiledscala || ! -e util/xmlAnal.class || "$flags" == "-f" || `stat -c %Y .compiledscala` < `stat -c %Y util/xmlAnal.scala` ]]
-    then
-        cd util
-        scalac xmlAnal.scala
-        cd ..
-        touch .compiledscala
-        echo "Compiled xmlAnal.scala"
-        echo
-    fi
-    progs="`echo test/*.pascal`"
+    #if [[ ! -e .compiledscala || ! -e util/xmlAnal.class || "$flags" == "-f" || `stat -c %Y .compiledscala` < `stat -c %Y util/xmlAnal.scala` ]]
+    #then
+    #    cd util
+    #    scalac xmlAnal.scala
+    #    cd ..
+    #    touch .compiledscala
+    #    echo "Compiled xmlAnal.scala"
+    #    echo
+    #fi
+    progs=test/$flags.pascal #`echo test/*.pascal`"
     for i in $(echo $progs | tr " " "\n")
     do
         echo `basename $i`

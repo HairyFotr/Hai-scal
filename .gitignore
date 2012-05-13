@@ -4,7 +4,8 @@
 *.zip
 .compiled*
 packs/*
+test/*
 
-pascal\src\compiler\lexanal\PascalLex.java
-pascal\src\compiler\synanal\PascalSym.java
-pascal\src\compiler\synanal\PascalTok.java
+pascal/src/compiler/lexanal/PascalLex.java
+pascal/src/compiler/synanal/PascalSym.java
+pascal/src/compiler/synanal/PascalTok.java

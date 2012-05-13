@@ -22,7 +22,7 @@ import compiler.synanal.*;
 %function   next_token
 %type       PascalSym
 %eofval{
-    if(blockNesting > 0) Report.warning("Reached end of file with unclosed block.");
+    //if(blockNesting > 0) Report.warning("Reached end of file with unclosed block.");
     if(commentNesting > 0) Report.warning("Reached end of file with unclosed comment.");
     return new PascalSym(PascalTok.EOF);
 %eofval}
@@ -57,13 +57,21 @@ import compiler.synanal.*;
 ''''|'[^']' { return sym(PascalTok.CHAR_CONST); }
 
 // ce bom razvil se kak dodaten feature :)
-"{$EXTENDED}" { System.out.println(":-) Using extended features."); extendedPascal = true; }
+"{$EXTENDED}" { System.out.println(":-) Using extended features."); extendedPascal = true; return sym(PascalTok.EXTENDED); }
+"auto"  { if(extendedPascal) return sym(PascalTok.AUTO);  else return sym(PascalTok.IDENTIFIER); }
+"case"  { if(extendedPascal) return sym(PascalTok.CASE);  else return sym(PascalTok.IDENTIFIER); }
+"goto"  { if(extendedPascal) return sym(PascalTok.GOTO);  else return sym(PascalTok.IDENTIFIER); }
+"label" { if(extendedPascal) return sym(PascalTok.LABEL); else return sym(PascalTok.IDENTIFIER); }
+"mod"   { if(extendedPascal) return sym(PascalTok.MOD);   else return sym(PascalTok.IDENTIFIER); }
+[/][/].*?[\n] { }
+
 
 "{" { commentNesting++; yybegin(COMMENT); }
 
 "true"|"false" { return sym(PascalTok.BOOL_CONST); }
 [0-9]+ { return sym(PascalTok.INT_CONST); }
 "nil"  { return sym(PascalTok.NIL); }
+
 
 
 "boolean"   { return sym(PascalTok.BOOL); }
@@ -82,7 +90,7 @@ import compiler.synanal.*;
 "not"  { return sym(PascalTok.NOT); }
 
 "begin" { blockNesting++; return sym(PascalTok.BEGIN); }
-"end"   { blockNesting--; if(blockNesting < 0) Report.warning("There is no block to end here. "+GetOutputString()); return sym(PascalTok.END); }
+"end"   { blockNesting--; /*if(blockNesting < 0) Report.warning("There is no block to end here. "+GetOutputString());*/ return sym(PascalTok.END); }
 "if"    { return sym(PascalTok.IF); }
 "then"  { return sym(PascalTok.THEN); }
 "else"  { return sym(PascalTok.ELSE); }
