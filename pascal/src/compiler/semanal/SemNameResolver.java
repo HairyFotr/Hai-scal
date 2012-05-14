@@ -4,11 +4,11 @@ import compiler.abstree.*;
 import compiler.abstree.tree.*;
 import compiler.semanal.type.*;
 
-class SemNameResolver implements AbsVisitor {
+public class SemNameResolver implements AbsVisitor {
 
     int lvl = 0;    
     boolean record = false;
-    boolean error = false;
+    public boolean error = false;
     
     public void Error(String s, AbsTree abs) {
         System.out.println("Nameresolver: "+s+" at line: "+abs.begLine);
@@ -135,6 +135,17 @@ class SemNameResolver implements AbsVisitor {
 	}
 
 	@Override
+	public void visit(AbsIfStmt acceptor) {
+	    acceptor.cond.accept(this);
+	    acceptor.thenStmt.accept(this);
+	    acceptor.elseStmt.accept(this);
+	}
+
+	@Override public void visit(AbsNilConst acceptor) {}
+
+	@Override public void visit(AbsPointerType acceptor) { acceptor.type.accept(this); }
+
+	@Override
 	public void visit(AbsFunDecl acceptor) {
         try {
 			SemTable.ins(acceptor.name.name, acceptor);
@@ -154,17 +165,6 @@ class SemNameResolver implements AbsVisitor {
 	        acceptor.stmt.accept(this);
 		SemTable.oldScope();	    
     }
-
-	@Override
-	public void visit(AbsIfStmt acceptor) {
-	    acceptor.cond.accept(this);
-	    acceptor.thenStmt.accept(this);
-	    acceptor.elseStmt.accept(this);
-	}
-
-	@Override public void visit(AbsNilConst acceptor) {}
-
-	@Override public void visit(AbsPointerType acceptor) { acceptor.type.accept(this); }
 
 	@Override
 	public void visit(AbsProcDecl acceptor) {

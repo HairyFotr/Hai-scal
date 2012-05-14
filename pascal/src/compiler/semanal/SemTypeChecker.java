@@ -5,12 +5,12 @@ import compiler.abstree.tree.*;
 import compiler.semanal.type.*;
 import java.util.ArrayList;
 
-class SemTypeChecker implements AbsVisitor {
+public class SemTypeChecker implements AbsVisitor {
 
     int lvl = 0;    
     int recordlvl = -1;
     ArrayList<SemRecordType> records = new ArrayList<SemRecordType>();
-    boolean error = false;
+    public boolean error = false;
     
     public void Error(String s, AbsTree abs) {
         System.out.println("Typechecker: "+s+" at line: "+abs.begLine);
