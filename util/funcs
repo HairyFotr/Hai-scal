@@ -9,6 +9,7 @@ syn="$cp/synanal"
 abs="$cp/abstree"
 sem="$cp/semanal"
 frm="$cp/frames"
+imc="$cp/imcode"
 
 cleanLex() {
     rm $lex/PascalLex.java 2> /dev/null
@@ -52,7 +53,7 @@ compileC() {
         fi;
     } && {
         #javac -cp $cup:$cupjar:$cp/:$abs:$abs/tree:$sem:$sem/type:. `find pascal -name *.java`;
-        javac -cp $cup:$cupjar:$cp/:$abs:$abs/tree:$sem:$sem/type:$frm:. $cup/*.java $cp/report/*.java $lex/*.java $abs/*.java $abs/tree/*.java $syn/*.java $sem/type/*.java $sem/*.java $frm/*.java $cp/Main.java
+        javac -cp $cup:$cupjar:$cp/:$abs:$abs/tree:$sem:$sem/type:$frm:$imc:. $cup/*.java $cp/report/*.java $lex/*.java $abs/*.java $abs/tree/*.java $syn/*.java $sem/type/*.java $sem/*.java $frm/*.java $imc/*.java $cp/Main.java
     }
 }
 

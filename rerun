@@ -1,0 +1,7 @@
+#!/bin/bash
+
+flags="$1"
+
+. util/funcs
+
+cleanAll; compileC && testC

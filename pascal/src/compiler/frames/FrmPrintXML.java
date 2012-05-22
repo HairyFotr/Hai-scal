@@ -308,6 +308,13 @@ public class FrmPrintXML implements AbsVisitor {
 	public void visit(AbsProgram acceptor) {
 		if (acceptor.error) { xml.print("<abserror kind=\"Program\"/>\n"); return; }
 		xml.print("<absnode " + printPos(acceptor) + " kind=\"Program\">\n");
+		{
+			FrmFrame ff = FrmDesc.getFrame(acceptor);
+			if(ff!=null) ff.toXML(xml); else xml.print("<abserror kind=\"NullFrame\"/>\n");
+		}
+		/*{
+			FrmDesc.getFrame(acceptor).toXML(xml);
+		}*/
 		acceptor.name.accept(this);
 		acceptor.decls.accept(this);
 		acceptor.stmt.accept(this);
@@ -410,7 +417,7 @@ public class FrmPrintXML implements AbsVisitor {
 		}
 		{
 			FrmAccess fa = FrmDesc.getAccess(acceptor);
-			if(fa!=null) fa.toXML(xml);
+			if(fa!=null) fa.toXML(xml); else xml.print("<abserror kind=\"NullAccess\"/>\n");
 		}
 		acceptor.name.accept(this);
 		acceptor.type.accept(this);

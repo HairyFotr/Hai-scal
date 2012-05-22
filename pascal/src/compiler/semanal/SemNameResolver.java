@@ -11,7 +11,7 @@ public class SemNameResolver implements AbsVisitor {
     public boolean error = false;
     
     public void Error(String s, AbsTree abs) {
-        System.out.println("Nameresolver: "+s+" at line: "+abs.begLine);
+        System.out.println("Nameresolver: "+s+" at: "+abs.begLine+","+abs.begColumn);
         error = true;
     }
     
@@ -154,11 +154,6 @@ public class SemNameResolver implements AbsVisitor {
 		}
 
 		SemTable.newScope();
-            try {
-			    SemTable.ins(acceptor.name.name, acceptor);
-		    } catch (SemIllegalInsertException e) {
-			    Error("I don't do polymorphism", acceptor.name);
-		    }
 	        acceptor.pars.accept(this);
 	        acceptor.type.accept(this);
 	        acceptor.decls.accept(this);
@@ -174,11 +169,6 @@ public class SemNameResolver implements AbsVisitor {
 			Error("I don't do polymorphism", acceptor.name);
 		}
 		SemTable.newScope();
-            try {
-			    SemTable.ins(acceptor.name.name, acceptor);
-		    } catch(SemIllegalInsertException e) {
-			    Error("I don't do polymorphism", acceptor.name);
-		    }
 	        acceptor.pars.accept(this);
 	        acceptor.decls.accept(this);
 	        acceptor.stmt.accept(this);

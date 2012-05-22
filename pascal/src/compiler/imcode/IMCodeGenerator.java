@@ -1,100 +1,82 @@
-package compiler.frames;
+package compiler.imcode;
 
 import compiler.abstree.*;
 import compiler.abstree.tree.*;
 import compiler.semanal.*;
+import compiler.frames.*;
+import java.util.*;
 
-public class FrmEvaluator implements AbsVisitor {
+/*Sestavite generator vmesne kode, ki izracuna fragmente vmesne kode:
+    ImcCodeChunk vsebuje celotno vmesno kodo funkcije (brez vgnezdenih funkcij) v obliki enega ImcMOVE ukaza, s katerim izraz funkcije priredimo zacasni spremenljivki RV.
+    ImcDataChunk vsebuje opis globalne spremenljivke.
+
+V klicni zapis sta dodani dve zacasni spremenljivki:
+    RV vsebuje rezultat funkcije.
+    FP vsebuje kazalec na klicni zapis.
+
+Ukazi vmesne kode se delijo na dve vrsti: ukazi za izraze in ukazi za stavke.
+Ukazi za izraze:
+    ImcBINOP(op,left,right): vrne vrednost binarnega izraza z operatorjem op podizrazoma left in right.
+    ImcCALL(label,args): vrne vrednost funkcije na naslovu label pri argumentih args (prvi argument je vrednost staticnega linka); vsak argument je predstavljen kot izraz vmesne kode, ki izracuna njegovo vrednost.
+    ImcCONST(value): vrne int vrednost value.
+    ImcESEQ(stmt,value): najprej izvede stavek stmt, nato vrne vrednost value.
+    ImcMEM(expr): dostop do naslova expr (ce je ImcMEM neposredni levi sin ukaza ImcMOVE, pomeni pisanje v pomnilnik, sicer pomeni branje iz pomnilnika).
+    ImcNAME(label): vrne naslov label.
+    ImcTEMP(temp): vrne vrednost zacasne spremenljivke temp.
+
+Ukazi za stavke:
+    ImcCJUMP(cond,true,false): ce je vrednost pogoja cond razlicna od 0, skoci na oznako true, sicer skoci na oznako false.
+    ImcEXP(expr): izracuna in zavrze rezultat izraza expr.
+    ImcJUMP(label): skoci na oznako label.
+    ImcLABEL(label): oznaka label.
+    ImcMOVE(dst,src): shrani vrednost src na naslov dst.
+    ImcSEQ(stmts): zaporedoma izvede stavke stmts.
+
+P.S. Dodeljevanje pomnilnika z izrazom oblike [<type>] prevedete v klic funkcije malloc(<typesize>), kjer je <typesize> velikost posameznega podatka tipa <type> (v bytih).*/
+
+public class IMCodeGenerator implements AbsVisitor {
+	
+	/** Zaporedje delov kode.  */
+	public static LinkedList<ImcChunk> chunks;
 
     boolean funcCall = false;
     int sizeArgs = 0;
-    
+
+    //
     public void visit(AbsAtomType acceptor) {}
     
     public void visit(AbsConstDecl acceptor) {}
     
     public void visit(AbsFunDecl acceptor) {
-        FrmFrame frame = new FrmFrame(acceptor, SemDesc.getScope(acceptor));
-        for (AbsDecl decl : acceptor.pars.decls) {
-            if (decl instanceof AbsVarDecl) {        
-                AbsVarDecl varDecl = (AbsVarDecl)decl;
-                FrmArgAccess access = new FrmArgAccess(varDecl, frame);
-                FrmDesc.setAccess(varDecl, access);
-            }
-        }
         for (AbsDecl decl : acceptor.decls.decls) {
-            if (decl instanceof AbsVarDecl) {        
-                AbsVarDecl varDecl = (AbsVarDecl)decl;
-                FrmLocAccess access = new FrmLocAccess(varDecl, frame);
-                frame.locVars.add(access);
-                FrmDesc.setAccess(varDecl, access);
-            }
             decl.accept(this);
         }
-        sizeArgs = 0;
-        funcCall = false;
+        for (AbsDecl decl : acceptor.pars.decls) {
+            decl.accept(this);
+        }
         acceptor.stmt.accept(this);
-        frame.sizeArgs = sizeArgs;
-        if(funcCall) frame.sizeArgs += 4;
-        
-        FrmDesc.setFrame(acceptor, frame);
     }
     
     public void visit(AbsProgram acceptor) {
-        FrmFrame frame = new FrmFrame(acceptor, 0);
         for (AbsDecl decl : acceptor.decls.decls) {
-            if (decl instanceof AbsVarDecl) {
-                AbsVarDecl varDecl = (AbsVarDecl)decl;
-                FrmVarAccess access = new FrmVarAccess(varDecl);
-                FrmDesc.setAccess(varDecl, access);
-            }
             decl.accept(this);
         }
-        sizeArgs = 0;
-        funcCall = false;
         acceptor.stmt.accept(this);//main
-        frame.sizeArgs = sizeArgs;
-        if(funcCall) frame.sizeArgs += 4;
-        
-        FrmDesc.setFrame(acceptor, frame);
     }
     
     public void visit(AbsProcDecl acceptor) {
-        FrmFrame frame = new FrmFrame(acceptor, SemDesc.getScope(acceptor));
-        for (AbsDecl decl : acceptor.pars.decls) {
-            if (decl instanceof AbsVarDecl) {        
-                AbsVarDecl varDecl = (AbsVarDecl)decl;
-                FrmArgAccess access = new FrmArgAccess(varDecl, frame);
-                FrmDesc.setAccess(varDecl, access);
-            }
-        }
         for (AbsDecl decl : acceptor.decls.decls) {
-            if (decl instanceof AbsVarDecl) {        
-                AbsVarDecl varDecl = (AbsVarDecl)decl;
-                FrmLocAccess access = new FrmLocAccess(varDecl, frame);
-                frame.locVars.add(access);
-                FrmDesc.setAccess(varDecl, access);
-            }
             decl.accept(this);
         }
-        sizeArgs = 0;
-        funcCall = false;
+        for (AbsDecl decl : acceptor.pars.decls) {
+            decl.accept(this);
+        }
         acceptor.stmt.accept(this);
-        frame.sizeArgs = sizeArgs;
-        if(funcCall) frame.sizeArgs += 4;
-        
-        FrmDesc.setFrame(acceptor, frame);
     }
     
     public void visit(AbsRecordType acceptor) {
-        int offset = 0;
         for (AbsDecl decl : acceptor.fields.decls) {
-            if (decl instanceof AbsVarDecl) {
-                AbsVarDecl varDecl = (AbsVarDecl)decl;
-                FrmCmpAccess access = new FrmCmpAccess(varDecl, offset);
-                FrmDesc.setAccess(varDecl, access);
-                offset = offset + SemDesc.getActualType(varDecl.type).size();
-            }
+            decl.accept(this);
 		}
     }
     
@@ -121,10 +103,6 @@ public class FrmEvaluator implements AbsVisitor {
     public void visit(AbsBlockStmt acceptor) { acceptor.stmts.accept(this); }
 
     public void visit(AbsCallExpr acceptor) {
-        funcCall = true;
-        int callSize = 0;
-        for(AbsValExpr expr : acceptor.args.exprs) callSize += SemDesc.getActualType(expr).size();
-        if(callSize > sizeArgs) sizeArgs = callSize;        
     }
 
     public void visit(AbsDeclName acceptor) {}
@@ -163,5 +141,6 @@ public class FrmEvaluator implements AbsVisitor {
         acceptor.cond.accept(this);
         acceptor.stmt.accept(this);
     }
-    
+ 
+
 }

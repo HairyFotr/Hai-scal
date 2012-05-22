@@ -204,25 +204,14 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsFunDecl acceptor) {
-        /*try {
-			SemTable.ins(acceptor.name.name, acceptor);
-		} catch (SemIllegalInsertException e) {
-			Error("I don't do polymorphism", acceptor.name);
-		}*/
-
-		//SemTable.newScope();
-            /*try {
-			    SemTable.ins(acceptor.name.name, acceptor);
-		    } catch (SemIllegalInsertException e) {
-			    Error("I don't do polymorphism", acceptor.name);
-		    }*/
-	        acceptor.pars.accept(this);
-	        acceptor.type.accept(this);
-	        acceptor.decls.accept(this);
-	        acceptor.stmt.accept(this);
-    		SemDesc.setActualType(acceptor, SemDesc.getActualType(acceptor.type));
-
-		//SemTable.oldScope();	    
+        acceptor.pars.accept(this);
+        acceptor.type.accept(this);
+        acceptor.decls.accept(this);
+        
+        SemSubprogramType funType = new SemSubprogramType(SemDesc.getActualType(acceptor.type));//return type
+        for(AbsDecl decl : acceptor.pars.decls) funType.addParType(SemDesc.getActualType(decl));//parameter types
+		SemDesc.setActualType(acceptor, funType);
+        acceptor.stmt.accept(this);
     }
 
 	@Override
@@ -245,22 +234,13 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsProcDecl acceptor) {
-        /*try {
-			SemTable.ins(acceptor.name.name, acceptor);
-		} catch (SemIllegalInsertException e) {
-			Error("I don't do polymorphism", acceptor.name);
-		}*/
-		//SemTable.newScope();
-            /*try {
-			    SemTable.ins(acceptor.name.name, acceptor);
-		    } catch(SemIllegalInsertException e) {
-			    Error("I don't do polymorphism", acceptor.name);
-		    }*/
-	        acceptor.pars.accept(this);
-	        acceptor.decls.accept(this);
-	        acceptor.stmt.accept(this);
-		//SemTable.oldScope();	    
-		SemDesc.setActualType(acceptor, new SemAtomType(SemAtomType.VOID));
+        acceptor.pars.accept(this);
+        acceptor.decls.accept(this);
+
+        SemSubprogramType procType = new SemSubprogramType(new SemAtomType(SemAtomType.VOID));//return type
+        for(AbsDecl decl : acceptor.pars.decls) procType.addParType(SemDesc.getActualType(decl));//parameter types
+		SemDesc.setActualType(acceptor, procType);
+        acceptor.stmt.accept(this);
 	}
 
 	@Override
