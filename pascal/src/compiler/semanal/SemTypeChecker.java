@@ -333,11 +333,17 @@ public class SemTypeChecker implements AbsVisitor {
 		AbsDecl decl = SemDesc.getNameDecl(acceptor);
 		
 		SemType type = SemDesc.getActualType(decl);		
-		if(type!=null) {
+		if(type==null) {
+		    decl.accept(this);
+		    type = SemDesc.getActualType(decl);		
+		}
+		SemDesc.setActualType(acceptor, type);
+		
+		/*if(type!=null) {
             SemDesc.setActualType(acceptor, type);
 	    } else {
 	        Error("unknown type", acceptor);
-        }
+        }*/
 	}
 
 	@Override

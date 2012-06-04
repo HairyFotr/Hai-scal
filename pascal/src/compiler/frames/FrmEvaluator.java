@@ -41,7 +41,7 @@ public class FrmEvaluator implements AbsVisitor {
     }
     
     public void visit(AbsProgram acceptor) {
-        FrmFrame frame = new FrmFrame(acceptor, 0);
+        FrmFrame frame = new FrmFrame(acceptor, 1);
         for (AbsDecl decl : acceptor.decls.decls) {
             if (decl instanceof AbsVarDecl) {
                 AbsVarDecl varDecl = (AbsVarDecl)decl;
@@ -61,9 +61,9 @@ public class FrmEvaluator implements AbsVisitor {
     
     public void visit(AbsProcDecl acceptor) {
         FrmFrame frame = new FrmFrame(acceptor, SemDesc.getScope(acceptor));
-        for (AbsDecl decl : acceptor.pars.decls) {
-            if (decl instanceof AbsVarDecl) {        
-                AbsVarDecl varDecl = (AbsVarDecl)decl;
+        for (AbsDecl pars : acceptor.pars.decls) {
+            if (pars instanceof AbsVarDecl) {        
+                AbsVarDecl varDecl = (AbsVarDecl)pars;
                 FrmArgAccess access = new FrmArgAccess(varDecl, frame);
                 FrmDesc.setAccess(varDecl, access);
             }
@@ -95,6 +95,7 @@ public class FrmEvaluator implements AbsVisitor {
                 FrmDesc.setAccess(varDecl, access);
                 offset = offset + SemDesc.getActualType(varDecl.type).size();
             }
+            decl.accept(this);
 		}
     }
     

@@ -5,7 +5,7 @@ import compiler.abstree.AbsVisitor;
 /**
  * Deklaracije: procedura.
  */
-public class AbsProcDecl extends AbsDecl {
+public class AbsProcDecl extends AbsSubprogramDecl {
 
 	/** Ime. */
 	public AbsDeclName name;

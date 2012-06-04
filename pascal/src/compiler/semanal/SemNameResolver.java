@@ -177,6 +177,8 @@ public class SemNameResolver implements AbsVisitor {
 
 	@Override
 	public void visit(AbsProgram acceptor) {
+	    SystemStubs.fillData();
+	
         acceptor.decls.accept(this);
         acceptor.stmt.accept(this);
 	}
