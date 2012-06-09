@@ -52,7 +52,7 @@ import compiler.synanal.*;
 }
 
 <YYINITIAL> {
-[ \n\t]+ { }
+[ \n\t\r]+ { }
 
 ''''|'[^']' { return sym(PascalTok.CHAR_CONST); }
 

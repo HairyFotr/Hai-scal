@@ -33,5 +33,11 @@ public class ImcMOVE extends ImcStmt {
 		lin.stmts.add(new ImcMOVE(dst.expr, src.expr));
 		return lin;
 	}
+	
+	@Override
+	public String toString() {
+	    return "ImcMOVE: " + (dst==null?"null":dst.toString()) + " := " + (src==null?"null":src.toString());
+	}
+	
 
 }

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 flags="$1"
+phase="$2"
 
 . util/funcs
 

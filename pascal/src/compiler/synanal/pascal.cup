@@ -61,7 +61,8 @@ precedence left GTH, LTH, GEQ, LEQ;
 precedence nonassoc EQU, NEQ;
 precedence left ADD, SUB;
 precedence left MUL, DIV, MOD;
-precedence left PTR;
+precedence nonassoc MEM;
+precedence nonassoc PTR;
 precedence nonassoc NOT;
 precedence left DOT,LBRACKET,RBRACKET;
 
@@ -79,7 +80,7 @@ source ::=
         decls.decls.addAll(((AbsDecls)vars).decls);
         decls.decls.addAll(((AbsDecls)funprocs).decls);
         
-        System.out.println(decls.decls.size());
+        //System.out.println(decls.decls.size());
         
         RESULT = (new AbsProgram((AbsDeclName)(new AbsDeclName(p)).setPos(p,pleft,pright), decls, (AbsBlockStmt)mainblock)).setBeg(b,bleft,bright).setEnd(mainblock); 
     :};

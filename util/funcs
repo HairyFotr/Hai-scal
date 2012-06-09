@@ -64,7 +64,7 @@ testC() {
     do
         echo `basename $i`
         cd pascal/src
-        java compiler.Main ../../${i%.*}
+        java compiler.Main ../../${i%.*} $phase
         if [ $? -ne "0" ]; then exit; fi
         cd ../..
     done

@@ -7,13 +7,15 @@ import java.util.ArrayList;
 
 public class SemTypeChecker implements AbsVisitor {
 
-    int lvl = 0;    
+    //int lvl = 0;    
     int recordlvl = -1;
     ArrayList<SemRecordType> records = new ArrayList<SemRecordType>();
     public boolean error = false;
+    public int errors = 0;
+    private String name = "Typechecker";
     
     public void Error(String s, AbsTree abs) {
-        System.out.println("Typechecker: "+s+" at line: "+abs.begLine);
+        System.out.println((++errors)+": " + name  + ": "+s+" at: "+abs.begLine+","+abs.begColumn);
         error = true;
     }
     
@@ -29,7 +31,9 @@ public class SemTypeChecker implements AbsVisitor {
 		    Integer 
 		        loBound = SemDesc.getActualConst(acceptor.loBound),
 		        hiBound = SemDesc.getActualConst(acceptor.hiBound);
-		        
+		    
+		    //System.out.println(loBound+".."+hiBound);
+		    
 		    if(loBound==null || hiBound==null) throw new Exception();
 
     		SemAtomType
@@ -38,12 +42,12 @@ public class SemTypeChecker implements AbsVisitor {
 
 		    if(loBoundT.type!=SemAtomType.INT || loBoundT.type!=SemAtomType.INT) throw new Exception();
 
-    		SemType
-    		    type = SemDesc.getActualType(acceptor.type);
+    		SemType type = SemDesc.getActualType(acceptor.type);
 		    if(type==null) throw new Exception();
 		    
 		    SemDesc.setActualType(acceptor, new SemArrayType(type, loBound, hiBound));
 	    } catch(Exception e) {
+	        //e.printStackTrace();
             Error("invalid array type", acceptor);
 	    }
 	}
@@ -56,10 +60,19 @@ public class SemTypeChecker implements AbsVisitor {
 		SemType
 		    dstType = SemDesc.getActualType(acceptor.dstExpr),
 		    srcType = SemDesc.getActualType(acceptor.srcExpr);
+	        if(dstType instanceof SemSubprogramType) dstType = ((SemSubprogramType)dstType).getResultType();
+	        if(srcType instanceof SemSubprogramType) srcType = ((SemSubprogramType)srcType).getResultType();
 		
 		if(dstType==null || srcType==null) 
 		    Error("unknown types, values or variables", acceptor);
-		else if(!dstType.coercesTo(srcType)) 
+		else if(dstType instanceof SemSubprogramType) {
+		    SemType returnType = ((SemSubprogramType)dstType).getResultType();
+		    if(!returnType.coercesTo(srcType)) {
+    		    Error("incompatible return type", acceptor);
+		    } else {
+		        //dstType = returnType;
+		    }
+		} else if(!dstType.coercesTo(srcType)) 
 		    Error("incompatible types", acceptor);
 	    else if(!(dstType instanceof SemAtomType || dstType instanceof SemPointerType))
 		    Error("invalid left type", acceptor);
@@ -92,10 +105,14 @@ public class SemTypeChecker implements AbsVisitor {
 		    SemType
 		        fstType = SemDesc.getActualType(acceptor.fstExpr),
 		        sndType = SemDesc.getActualType(acceptor.sndExpr);
+		    if(fstType instanceof SemSubprogramType) fstType = ((SemSubprogramType)fstType).getResultType();
+		    if(sndType instanceof SemSubprogramType) sndType = ((SemSubprogramType)sndType).getResultType();
+		    
 		    
 	        switch(acceptor.oper) {
 	            case AbsBinExpr.ADD:case AbsBinExpr.SUB:case AbsBinExpr.MUL:case AbsBinExpr.DIV:
-	                if(((SemAtomType)fstType).type!=SemAtomType.INT || ((SemAtomType)sndType).type!=SemAtomType.INT) throw new Exception();
+	                if(((SemAtomType)fstType).type!=SemAtomType.INT 
+	                || ((SemAtomType)sndType).type!=SemAtomType.INT) throw new Exception();
 	                
 	                SemDesc.setActualType(acceptor, new SemAtomType(SemAtomType.INT));
 	                break;
@@ -109,13 +126,15 @@ public class SemTypeChecker implements AbsVisitor {
                     if(fstType.coercesTo(sndType) && ((SemAtomType)fstType).type==SemAtomType.BOOL)
     	                SemDesc.setActualType(acceptor, new SemAtomType(SemAtomType.BOOL));
                     else 
-                        throw new Exception();
+                        Error("weird logic expression", acceptor);
+                        //throw new Exception();
                     break;
                 case AbsBinExpr.ARRACCESS:
                     if(fstType instanceof SemArrayType && ((SemAtomType)sndType).type==SemAtomType.INT)
     	                SemDesc.setActualType(acceptor, ((SemArrayType)fstType).type);
                     else 
-                        throw new Exception();
+                        Error("weird array access", acceptor);
+                        //throw new Exception();
                     break;
                 case AbsBinExpr.RECACCESS:
                     if(fstType instanceof SemRecordType && acceptor.sndExpr instanceof AbsValName) {
@@ -130,11 +149,13 @@ public class SemTypeChecker implements AbsVisitor {
                             }
                         if(dn==null) throw new Exception();
                     } else {
-                        throw new Exception();
+                        Error("weird record access", acceptor);
+                        //throw new Exception();
                     }
                     break;
 	        }
 	    } catch(Exception e) {
+	        //e.printStackTrace();
 	        Error("incompatible types", acceptor);
 	    }
 	}
@@ -166,6 +187,10 @@ public class SemTypeChecker implements AbsVisitor {
 		acceptor.value.accept(this);
 		
 		SemType type = SemDesc.getActualType(acceptor.value);
+		if(type instanceof SemAtomType && ((SemAtomType)type).type==SemAtomType.INT && acceptor.value instanceof AbsAtomConst) {
+		    //System.out.println(acceptor.value.getClass().toString());
+		    //SemDesc.setActualConst(acceptor.name, Integer.parseInt(((AbsAtomConst)acceptor.value).value));
+		}
 		
 		//AbsDecl decl = SemTable.fnd(acceptor.name.name);
 		//SemDesc.setActualType(decl, type);
@@ -190,14 +215,30 @@ public class SemTypeChecker implements AbsVisitor {
 	        SemDesc.setNameDecl(acceptor, var);
 	    }*/
 
+	    acceptor.name.accept(this);
+
+		try {
+		    SemType type = SemDesc.getActualType(acceptor.name);
+    		if(((SemAtomType)type).type!=SemAtomType.INT) throw new Exception();
+        } catch(Exception e) {
+		    Error("invalid iterator type", acceptor);
+        }
+        	    
 	    acceptor.loBound.accept(this);
 	    acceptor.hiBound.accept(this);
 	    
-		/*Integer 
-		    loBound = SemDesc.getActualConst(acceptor.loBound),
-		    hiBound = SemDesc.getActualConst(acceptor.hiBound);
-		    
-		if(loBound==null || hiBound==null) Error("weird for loop interval", acceptor);*/
+		try {
+		    SemType 
+		        lo = SemDesc.getActualType(acceptor.loBound),
+		        hi = SemDesc.getActualType(acceptor.hiBound);
+	        if(lo instanceof SemSubprogramType) lo = ((SemSubprogramType)lo).getResultType();
+	        if(hi instanceof SemSubprogramType) hi = ((SemSubprogramType)hi).getResultType();
+		
+            if(((SemAtomType)lo).type!=SemAtomType.INT 
+            || ((SemAtomType)hi).type!=SemAtomType.INT) throw new Exception();		    
+		} catch(Exception e) {
+		    Error("invalid for loop range", acceptor);
+		}
 		
 		acceptor.stmt.accept(this);
 	}
@@ -283,7 +324,7 @@ public class SemTypeChecker implements AbsVisitor {
 	public void visit(AbsTypeName acceptor) {
         AbsDecl decl = SemDesc.getNameDecl(acceptor);
 		SemType type = SemDesc.getActualType(decl);
-		SemDesc.setActualType(acceptor, type);
+        if(type!=null) SemDesc.setActualType(acceptor, type);
 		if(type==null) Error("Unknown type", acceptor);
 	    /*AbsDecl typedecl = SemTable.fnd(acceptor.name);
 	    if(typedecl==null) {
@@ -356,8 +397,8 @@ public class SemTypeChecker implements AbsVisitor {
 		
 		acceptor.type.accept(this);
 		SemType type = SemDesc.getActualType(acceptor.type);
-        SemDesc.setActualType(acceptor, type);
-        if(type==null) Error("unknown type", acceptor);
+        if(type!=null) SemDesc.setActualType(acceptor, type);
+		if(type==null) Error("Unknown type", acceptor);
         
         if(recordlvl>=0) {
             records.get(records.size()-1).addField(acceptor.name, type);

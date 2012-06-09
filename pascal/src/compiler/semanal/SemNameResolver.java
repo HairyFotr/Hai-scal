@@ -9,9 +9,11 @@ public class SemNameResolver implements AbsVisitor {
     int lvl = 0;    
     boolean record = false;
     public boolean error = false;
+    public int errors = 0;
+    private String name = "Nameresolver";
     
     public void Error(String s, AbsTree abs) {
-        System.out.println("Nameresolver: "+s+" at: "+abs.begLine+","+abs.begColumn);
+        System.out.println((++errors)+": " + name  + ": "+s+" at: "+abs.begLine+","+abs.begColumn);
         error = true;
     }
     
@@ -114,6 +116,7 @@ public class SemNameResolver implements AbsVisitor {
 
 	@Override
 	public void visit(AbsForStmt acceptor) {
+	    acceptor.name.accept(this);
 	    AbsDecl var = SemTable.fnd(acceptor.name.name);
 	    if(var==null) {
 	        Error("undeclared variable", acceptor);
@@ -124,12 +127,12 @@ public class SemNameResolver implements AbsVisitor {
 	    acceptor.loBound.accept(this);
 	    acceptor.hiBound.accept(this);
 	    
-		Integer 
-		    loBound = SemDesc.getActualConst(acceptor.loBound),
-		    hiBound = SemDesc.getActualConst(acceptor.hiBound);
+		//Integer 
+		//    loBound = SemDesc.getActualConst(acceptor.loBound),
+		//    hiBound = SemDesc.getActualConst(acceptor.hiBound);
 		
 		// tole ze preveri tipe
-		if(loBound==null || hiBound==null) Error("invalid for loop interval", acceptor);
+		//if(loBound==null || hiBound==null) Error("invalid for loop interval", acceptor);
 		
 		acceptor.stmt.accept(this);
 	}

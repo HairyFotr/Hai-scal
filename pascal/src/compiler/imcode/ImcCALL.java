@@ -52,4 +52,10 @@ public class ImcCALL extends ImcExpr {
 		return new ImcESEQ(linStmt, new ImcTEMP(temp));
 	}
 
+	@Override
+	public String toString() {
+	    return "ImcCALL: " + (label==null?"null":label.name());// + "(" + (src==null?"null":src.toString()) + ")";
+	}
+
+
 }

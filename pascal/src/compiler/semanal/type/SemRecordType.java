@@ -37,7 +37,10 @@ public class SemRecordType extends SemType {
 	@Override
 	public void toXML(PrintStream xml) {
 		xml.print("<semtype kind=\"RECORD" + this.hashCode() + "\">\n");
-		for (int i = 0; i < getNumFields(); i++) getFieldType(i).toXML(xml);
+		for (int i = 0; i < getNumFields(); i++) 
+		try {
+		    getFieldType(i).toXML(xml);
+	    } catch(Exception e) {}	        
 		xml.print("</semtype>\n");
 	}
 	

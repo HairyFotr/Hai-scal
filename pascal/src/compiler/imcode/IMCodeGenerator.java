@@ -109,7 +109,7 @@ public class IMCodeGenerator implements AbsVisitor {
                 SemArrayType arrayType = (SemArrayType)SemDesc.getActualType(acceptor.fstExpr);
                 
                 mem = true;
-                acceptor.fstExpr.accept(this);
+                acceptor.sndExpr.accept(this);
                 ImcExpr index = (ImcExpr)code;
                 mem = false;
 
@@ -224,7 +224,7 @@ public class IMCodeGenerator implements AbsVisitor {
         //System.out.println(code.getClass().toString()+"1");
         acceptor.name.accept(this);
         //System.out.println(code.getClass().toString()+"2");
-        ImcExpr name = (code instanceof ImcEXP)?((ImcEXP)code).expr:(ImcExpr)code;
+        ImcExpr name = (ImcExpr)code;//(code instanceof ImcEXP)?((ImcEXP)code).expr:(ImcExpr)code;
         acceptor.loBound.accept(this);
         ImcExpr lo = (ImcExpr)code;
         acceptor.hiBound.accept(this);
@@ -294,8 +294,12 @@ public class IMCodeGenerator implements AbsVisitor {
         FrmAccess access = FrmDesc.getAccess(decl);
         
         if(access instanceof FrmVarAccess || acceptor instanceof AbsValName || decl instanceof AbsVarDecl) {
-            FrmVarAccess varAccess = (FrmVarAccess)access;
-            code = new ImcNAME((access==null)?FrmLabel.newLabel(acceptor.name):varAccess.label);
+            if(access instanceof FrmVarAccess) {
+                FrmVarAccess varAccess = (FrmVarAccess)access;
+                code = new ImcNAME((access==null)?FrmLabel.newLabel(acceptor.name):varAccess.label);
+            } else {
+                code = new ImcNAME(FrmLabel.newLabel(acceptor.name));
+            }
             if(mem) code = new ImcMEM((ImcNAME)code);
         }
         if(access instanceof FrmArgAccess) {
@@ -312,7 +316,7 @@ public class IMCodeGenerator implements AbsVisitor {
         if(decl instanceof AbsFunDecl) {
             FrmFrame frm = FrmDesc.getFrame(decl);
             code = new ImcTEMP(frm.RV);
-            if(mem) code = new ImcMEM((ImcTEMP)code);
+            //if(mem) code = new ImcMEM((ImcTEMP)code);
             
             SemType type = SemDesc.getActualType(decl);
             if(type instanceof SemRecordType || type instanceof SemArrayType) {
