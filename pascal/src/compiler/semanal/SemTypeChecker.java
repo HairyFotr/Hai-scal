@@ -32,8 +32,6 @@ public class SemTypeChecker implements AbsVisitor {
 		        loBound = SemDesc.getActualConst(acceptor.loBound),
 		        hiBound = SemDesc.getActualConst(acceptor.hiBound);
 		    
-		    //System.out.println(loBound+".."+hiBound);
-		    
 		    if(loBound==null || hiBound==null) throw new Exception();
 
     		SemAtomType
@@ -47,7 +45,6 @@ public class SemTypeChecker implements AbsVisitor {
 		    
 		    SemDesc.setActualType(acceptor, new SemArrayType(type, loBound, hiBound));
 	    } catch(Exception e) {
-	        //e.printStackTrace();
             Error("invalid array type", acceptor);
 	    }
 	}
@@ -107,8 +104,7 @@ public class SemTypeChecker implements AbsVisitor {
 		        sndType = SemDesc.getActualType(acceptor.sndExpr);
 		    if(fstType instanceof SemSubprogramType) fstType = ((SemSubprogramType)fstType).getResultType();
 		    if(sndType instanceof SemSubprogramType) sndType = ((SemSubprogramType)sndType).getResultType();
-		    
-		    
+		    		    
 	        switch(acceptor.oper) {
 	            case AbsBinExpr.ADD:case AbsBinExpr.SUB:case AbsBinExpr.MUL:case AbsBinExpr.DIV:
 	                if(((SemAtomType)fstType).type!=SemAtomType.INT 
@@ -141,21 +137,20 @@ public class SemTypeChecker implements AbsVisitor {
                         SemRecordType r = (SemRecordType)fstType;
                         AbsValName sex = (AbsValName)acceptor.sndExpr;
                         AbsDeclName dn = null;
-                        for(int i=0; i<r.getNumFields(); i++)
+                        for(int i=0; i<r.getNumFields(); i++) {
                             if((sex.name).equals(r.getFieldName(i).name)) {
                                 dn = r.getFieldName(i);
                                 SemDesc.setActualType(acceptor, r.getFieldType(i));
                                 break;
                             }
+                        }
                         if(dn==null) throw new Exception();
                     } else {
                         Error("weird record access", acceptor);
-                        //throw new Exception();
                     }
                     break;
 	        }
 	    } catch(Exception e) {
-	        //e.printStackTrace();
 	        Error("incompatible types", acceptor);
 	    }
 	}
@@ -164,13 +159,6 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsCallExpr acceptor) {
-	    /*AbsDecl funcproc = SemTable.fnd(acceptor.name.name);
-	    if(funcproc==null) {
-	        Error("unknown method", acceptor);
-	    } else {
-	        SemDesc.setNameDecl(acceptor, funcproc);
-	    }*/
-	    
         acceptor.name.accept(this);
         acceptor.args.accept(this);
         SemDesc.setActualType(acceptor, SemDesc.getActualType(acceptor.name));
@@ -178,22 +166,9 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsConstDecl acceptor) {
-	    /*if(!recordlvl) try {
-		    SemTable.ins(acceptor.name.name, acceptor);
-	    } catch(SemIllegalInsertException e) {
-	        Error("redeclaration", acceptor.name);
-	    }*/
-
 		acceptor.value.accept(this);
 		
 		SemType type = SemDesc.getActualType(acceptor.value);
-		if(type instanceof SemAtomType && ((SemAtomType)type).type==SemAtomType.INT && acceptor.value instanceof AbsAtomConst) {
-		    //System.out.println(acceptor.value.getClass().toString());
-		    //SemDesc.setActualConst(acceptor.name, Integer.parseInt(((AbsAtomConst)acceptor.value).value));
-		}
-		
-		//AbsDecl decl = SemTable.fnd(acceptor.name.name);
-		//SemDesc.setActualType(decl, type);
 		AbsDecl decl = SemDesc.getNameDecl(acceptor.name);
 		SemDesc.setActualType(decl, type);
 		SemDesc.setActualType(acceptor, type);
@@ -208,13 +183,6 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsForStmt acceptor) {
-	    /*AbsDecl var = SemTable.fnd(acceptor.name.name);
-	    if(var==null) {
-	        Error("undeclared variable", acceptor);
-        } else {
-	        SemDesc.setNameDecl(acceptor, var);
-	    }*/
-
 	    acceptor.name.accept(this);
 
 		try {
@@ -299,25 +267,18 @@ public class SemTypeChecker implements AbsVisitor {
 		SemDesc.setActualType(acceptor, records.get(records.size()-1));
 	    records.remove(recordlvl);
         recordlvl--;
-        //if(recordlvl==-1) records.clear();
 	}
 
 	@Override public void visit(AbsStmts acceptor) { for(AbsStmt stmt : acceptor.stmts) stmt.accept(this); }
 
 	@Override
 	public void visit(AbsTypeDecl acceptor) {
-        /*try {
-			SemTable.ins(acceptor.name.name, acceptor);
-		} catch(SemIllegalInsertException e) {
-			Error("redeclaration", acceptor.name);
-		}*/
 		acceptor.type.accept(this);
 		acceptor.name.accept(this);
 		SemType type = SemDesc.getActualType(acceptor.type);
 		SemDesc.setActualType(acceptor, type);
 		SemDesc.setActualType(acceptor.name, type);
 		if(type==null) Error("Invalid type", acceptor);
-		//SemDesc.setNameDecl(acceptor.name, acceptor);
 	}
 
 	@Override
@@ -326,12 +287,6 @@ public class SemTypeChecker implements AbsVisitor {
 		SemType type = SemDesc.getActualType(decl);
         if(type!=null) SemDesc.setActualType(acceptor, type);
 		if(type==null) Error("Unknown type", acceptor);
-	    /*AbsDecl typedecl = SemTable.fnd(acceptor.name);
-	    if(typedecl==null) {
-	        Error("unknown type", acceptor);
-	    } else {
-	        SemDesc.setNameDecl(acceptor, typedecl);
-	    }*/
 	}
 
 	@Override
@@ -370,31 +325,17 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsValName acceptor) {
-		//AbsDecl decl = SemTable.fnd(acceptor.name);
 		AbsDecl decl = SemDesc.getNameDecl(acceptor);
-		
 		SemType type = SemDesc.getActualType(decl);		
-		if(type==null) {
+		if(decl!=null && type==null) {
 		    decl.accept(this);
 		    type = SemDesc.getActualType(decl);		
 		}
-		SemDesc.setActualType(acceptor, type);
-		
-		/*if(type!=null) {
-            SemDesc.setActualType(acceptor, type);
-	    } else {
-	        Error("unknown type", acceptor);
-        }*/
+		if(type!=null) SemDesc.setActualType(acceptor, type);
 	}
 
 	@Override
 	public void visit(AbsVarDecl acceptor) {
-		/*if(!recordlvl) try {
-			SemTable.ins(acceptor.name.name, acceptor);
-		} catch(SemIllegalInsertException e) {
-			Error("redeclaration", acceptor.name);
-		}*/
-		
 		acceptor.type.accept(this);
 		SemType type = SemDesc.getActualType(acceptor.type);
         if(type!=null) SemDesc.setActualType(acceptor, type);

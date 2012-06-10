@@ -6,8 +6,9 @@ import compiler.semanal.type.*;
 
 public class SemNameResolver implements AbsVisitor {
 
-    int lvl = 0;    
-    boolean record = false;
+    int recordlvl = -1;
+    boolean record() { return recordlvl!=-1; }
+    
     public boolean error = false;
     public int errors = 0;
     private String name = "Nameresolver";
@@ -30,18 +31,6 @@ public class SemNameResolver implements AbsVisitor {
 	public void visit(AbsAssignStmt acceptor) {
 	    acceptor.dstExpr.accept(this);
 	    acceptor.srcExpr.accept(this);
-		
-		/*AbsDecl decl = null;
-		if(acceptor.dstExpr instanceof AbsValName) {
-		    decl = SemTable.fnd(((AbsValName)acceptor.dstExpr).name);
-	    } else if(acceptor.dstExpr instanceof AbsAlloc) {
-	        //TODO hmmmmm
-	        Error("not implemented", acceptor);
-	    } else {
-	        Error("weird left side", acceptor);
-        }
-        
-		if(decl==null) Error("undefined variable", acceptor);*/
 	}
 
 	@Override
@@ -65,7 +54,7 @@ public class SemNameResolver implements AbsVisitor {
 	@Override
 	public void visit(AbsBinExpr acceptor) {
 		acceptor.fstExpr.accept(this);
-        if(acceptor.oper==AbsBinExpr.RECACCESS) record = true;
+        if(acceptor.oper==AbsBinExpr.RECACCESS) return; //record = true;
 	    acceptor.sndExpr.accept(this);
 	    Integer 
 	        fstVal = SemDesc.getActualConst(acceptor.fstExpr),
@@ -76,7 +65,7 @@ public class SemNameResolver implements AbsVisitor {
 		    case AbsBinExpr.MUL: SemDesc.setActualConst(acceptor, fstVal * sndVal);	break;
 		    case AbsBinExpr.DIV: if(sndVal!=0) SemDesc.setActualConst(acceptor, fstVal / sndVal);	break;
 	    }
-	    record = false;
+	    //record = false;
 	}
 
 	@Override public void visit(AbsBlockStmt acceptor) { acceptor.stmts.accept(this); }
@@ -96,7 +85,7 @@ public class SemNameResolver implements AbsVisitor {
 
 	@Override
 	public void visit(AbsConstDecl acceptor) {
-	    if(!record) try {
+	    if(!record()) try {
 		    SemTable.ins(acceptor.name.name, acceptor);
 	    } catch(SemIllegalInsertException e) {
 	        Error("redeclaration", acceptor.name);
@@ -126,13 +115,6 @@ public class SemNameResolver implements AbsVisitor {
 
 	    acceptor.loBound.accept(this);
 	    acceptor.hiBound.accept(this);
-	    
-		//Integer 
-		//    loBound = SemDesc.getActualConst(acceptor.loBound),
-		//    hiBound = SemDesc.getActualConst(acceptor.hiBound);
-		
-		// tole ze preveri tipe
-		//if(loBound==null || hiBound==null) Error("invalid for loop interval", acceptor);
 		
 		acceptor.stmt.accept(this);
 	}
@@ -188,20 +170,21 @@ public class SemNameResolver implements AbsVisitor {
 
 	@Override
 	public void visit(AbsRecordType acceptor) {
-	    record = true;
+	    recordlvl++;
         acceptor.fields.accept(this);
-        record = false;
+        recordlvl--;
 	}
 
 	@Override public void visit(AbsStmts acceptor) { for(AbsStmt stmt : acceptor.stmts) stmt.accept(this); }
 
 	@Override
 	public void visit(AbsTypeDecl acceptor) {
-        try {
+        if(!record()) try {
 			SemTable.ins(acceptor.name.name, acceptor);
 		} catch(SemIllegalInsertException e) {
 			Error("redeclaration", acceptor.name);
 		}
+		
 		acceptor.type.accept(this);
 		SemDesc.setNameDecl(acceptor.name, acceptor);
 	}
@@ -230,7 +213,7 @@ public class SemNameResolver implements AbsVisitor {
 
 	@Override
 	public void visit(AbsValName acceptor) {
-	    if(!record) {
+	    //if(!record) {
 	        AbsDecl decl = SemTable.fnd(acceptor.name);
 	        if(decl==null) {
 		        Error("undefined variable", acceptor);
@@ -239,12 +222,12 @@ public class SemNameResolver implements AbsVisitor {
 		        Integer val = SemDesc.getActualConst(decl);
 		        if(val!=null) SemDesc.setActualConst(acceptor, val);
 	        }
-        }
+        //}
 	}
 
 	@Override
 	public void visit(AbsVarDecl acceptor) {
-		if(!record) try {
+		if(!record()) try {
 			SemTable.ins(acceptor.name.name, acceptor);
 		} catch(SemIllegalInsertException e) {
 			Error("redeclaration", acceptor.name);

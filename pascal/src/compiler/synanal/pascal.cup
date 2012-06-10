@@ -55,6 +55,7 @@ non terminal AbsTree var_declarations_record;
 non terminal cases_opt, case_;
 non terminal String eps;
 
+/*
 precedence left OR;
 precedence left AND;
 precedence left GTH, LTH, GEQ, LEQ;
@@ -68,6 +69,16 @@ precedence left DOT,LBRACKET,RBRACKET;
 
 precedence nonassoc ASSIGN;
 precedence left LBRACKET,RBRACKET;
+*/
+precedence left AND;
+precedence left OR;
+precedence left EQU, NEQ;
+precedence left GTH, LTH, GEQ, LEQ;
+precedence left ADD, SUB;
+precedence left MUL, DIV, MOD;
+precedence left PTR;
+precedence nonassoc NOT;
+precedence left DOT, LBRACKET, RBRACKET;
 
 start with source;
 
