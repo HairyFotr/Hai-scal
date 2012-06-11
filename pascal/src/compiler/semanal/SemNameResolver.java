@@ -64,6 +64,7 @@ public class SemNameResolver implements AbsVisitor {
 		    case AbsBinExpr.SUB: SemDesc.setActualConst(acceptor, fstVal - sndVal);	break;
 		    case AbsBinExpr.MUL: SemDesc.setActualConst(acceptor, fstVal * sndVal);	break;
 		    case AbsBinExpr.DIV: if(sndVal!=0) SemDesc.setActualConst(acceptor, fstVal / sndVal);	break;
+		    case AbsBinExpr.MOD: if(sndVal!=0) SemDesc.setActualConst(acceptor, fstVal % sndVal);	break;
 	    }
 	    //record = false;
 	}

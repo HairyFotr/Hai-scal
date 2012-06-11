@@ -16,6 +16,7 @@ public class ImcBINOP extends ImcExpr {
 	public static final int GEQ = 9;
 	public static final int AND = 10;
 	public static final int OR  = 11;
+	public static final int MOD = 14;
 
 	/** Operator.  */
 	public int op;
@@ -48,6 +49,7 @@ public class ImcBINOP extends ImcExpr {
 		case GEQ: op = "&#62;="; break;
 		case AND: op = "&#38;" ; break;
 		case OR : op = "|" ; break;
+		case MOD: op = "%" ; break;
 		}
 		xml.print("<imcnode kind=\"BINOP\" value=\"" + op + "\">\n");
 		limc.toXML(xml);

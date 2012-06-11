@@ -158,6 +158,9 @@ public class SemPrintXML implements AbsVisitor {
 		case AbsBinExpr.RECACCESS:
 			oper = "RECACCESS";
 			break;
+		case AbsBinExpr.MOD:
+			oper = "MOD";
+			break;
 		}
 		xml.print("<absnode " + printPos(acceptor) + " kind=\"BinExpr\" value=\"" + oper + "\">\n");
 		{

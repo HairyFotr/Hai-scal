@@ -177,6 +177,7 @@ public class Interpreter {
 			case ImcBINOP.SUB: return lval - rval;
 			case ImcBINOP.MUL: return lval * rval;
 			case ImcBINOP.DIV: return lval / rval;
+			case ImcBINOP.MOD: return lval % rval;
 			case ImcBINOP.EQU: return (lval == rval ? 1 : 0);
 			case ImcBINOP.NEQ: return (lval != rval ? 1 : 0);
 			case ImcBINOP.LTH: return (lval < rval ? 1 : 0);

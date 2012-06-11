@@ -21,6 +21,7 @@ public class AbsBinExpr extends AbsValExpr {
 	public static final int OR = 11;
 	public static final int ARRACCESS = 12;
 	public static final int RECACCESS = 13;
+	public static final int MOD = 14;
 	
 	/* Binarni operator. */
 	public int oper;

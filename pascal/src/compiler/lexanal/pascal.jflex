@@ -62,10 +62,10 @@ import compiler.synanal.*;
 "case"  { if(extendedPascal) return sym(PascalTok.CASE);  else return sym(PascalTok.IDENTIFIER); }
 "goto"  { if(extendedPascal) return sym(PascalTok.GOTO);  else return sym(PascalTok.IDENTIFIER); }
 "label" { if(extendedPascal) return sym(PascalTok.LABEL); else return sym(PascalTok.IDENTIFIER); }
-"mod"   { if(extendedPascal) return sym(PascalTok.MOD);   else return sym(PascalTok.IDENTIFIER); }
+//"mod"   { if(extendedPascal) return sym(PascalTok.MOD);   else return sym(PascalTok.IDENTIFIER); }
+"mod"   { return sym(PascalTok.MOD); }
+
 [/][/].*?[\n] { }
-
-
 "{" { commentNesting++; yybegin(COMMENT); }
 
 "true"|"false" { return sym(PascalTok.BOOL_CONST); }

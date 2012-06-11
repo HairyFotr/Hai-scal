@@ -106,7 +106,7 @@ public class SemTypeChecker implements AbsVisitor {
 		    if(sndType instanceof SemSubprogramType) sndType = ((SemSubprogramType)sndType).getResultType();
 		    		    
 	        switch(acceptor.oper) {
-	            case AbsBinExpr.ADD:case AbsBinExpr.SUB:case AbsBinExpr.MUL:case AbsBinExpr.DIV:
+	            case AbsBinExpr.ADD:case AbsBinExpr.SUB:case AbsBinExpr.MUL:case AbsBinExpr.DIV:case AbsBinExpr.MOD:
 	                if(((SemAtomType)fstType).type!=SemAtomType.INT 
 	                || ((SemAtomType)sndType).type!=SemAtomType.INT) throw new Exception();
 	                
