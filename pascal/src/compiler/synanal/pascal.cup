@@ -23,7 +23,7 @@ parser code
 terminal String BOOL_CONST, CHAR_CONST, INT_CONST, NIL;
 terminal String IDENTIFIER;
 
-terminal String BOOL, CHAR, INT;
+terminal String BOOL, CHAR, INT, AUTO;
 
 terminal String COLON, COMMA, DOT, DOTS, LBRACKET, LPARENTHESIS, RBRACKET, RPARENTHESIS, SEMIC;
 terminal String ADD, AND, DIV, EQU, GEQ, GTH, LEQ, LTH, MEM, MUL, MOD, NEQ, NOT, OR, PTR, SUB, UADD, USUB, VAL, XOR;
@@ -52,7 +52,7 @@ non terminal AbsTree func, proc, parameters, parameters_call, value_list, var_de
 non terminal AbsTree statement, statements_opt;
 
 non terminal extended_opt_;
-terminal EXTENDED, AUTO, CASE, LABEL, GOTO;
+terminal EXTENDED, CASE, LABEL, GOTO;
 non terminal labeldec_opt_, labeldefs, labeldef;
 non terminal AbsTree var_declarations_record;
 non terminal cases_opt, case_;
@@ -167,7 +167,7 @@ typedec_opt ::=
         BOOL:t {: RESULT = (new AbsAtomType(AbsAtomType.BOOL)).setPos(t,tleft,tright); :} |
         CHAR:t {: RESULT = (new AbsAtomType(AbsAtomType.CHAR)).setPos(t,tleft,tright); :} |
         INT:t {: RESULT = (new AbsAtomType(AbsAtomType.INT)).setPos(t,tleft,tright); :} |
-        AUTO:t | //Ext
+        AUTO:t {: RESULT = (new AbsAtomType(AbsAtomType.AUTO)).setPos(t,tleft,tright); :} | //Ext
         record:r {: RESULT = (AbsRecordType)r; :} |
         array:a {: RESULT = (AbsArrayType)a; :} |
         PTR:p type:t {: RESULT = (new AbsPointerType((AbsTypeExpr)t)).setBeg(p,pleft,pright).setEnd(t); :} |

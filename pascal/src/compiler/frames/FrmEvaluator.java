@@ -9,6 +9,15 @@ public class FrmEvaluator implements AbsVisitor {
     boolean funcCall = false;
     int sizeArgs = 0;
     
+    public boolean error = false;
+    public int errors = 0;
+    private String name = "FrmEvaluator";
+    
+    public void Error(String s, AbsTree abs) {
+        System.out.println((++errors)+": " + name  + ": "+s+" at: "+abs.begLine+","+abs.begColumn);
+        error = true;
+    }
+
     public void visit(AbsAtomType acceptor) {}
     
     public void visit(AbsConstDecl acceptor) {}
@@ -124,7 +133,11 @@ public class FrmEvaluator implements AbsVisitor {
     public void visit(AbsCallExpr acceptor) {
         funcCall = true;
         int callSize = 0;
-        for(AbsValExpr expr : acceptor.args.exprs) callSize += SemDesc.getActualType(expr).size();
+        for(AbsValExpr expr : acceptor.args.exprs) try {
+            callSize += SemDesc.getActualType(expr).size();
+        } catch(NullPointerException e) {
+            Error("type inference failed", acceptor);
+        }
         if(callSize > sizeArgs) sizeArgs = callSize;        
     }
 

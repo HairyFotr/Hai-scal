@@ -63,19 +63,41 @@ public class SemTypeChecker implements AbsVisitor {
 	        if(dstType instanceof SemSubprogramType) dstType = ((SemSubprogramType)dstType).getResultType();
 	        if(srcType instanceof SemSubprogramType) srcType = ((SemSubprogramType)srcType).getResultType();
 		
-		if(dstType==null || srcType==null) 
-		    Error("unknown types, values or variables", acceptor);
-		else if(dstType instanceof SemSubprogramType) {
+		if(dstType==null || srcType==null) {
+		    if(dstType==null && srcType!=null) {
+    		    AbsVarDecl decl = (AbsVarDecl)SemDesc.getNameDecl(acceptor.dstExpr);
+    		    SemDesc.setActualType(acceptor.dstExpr, srcType);
+    		    SemDesc.setActualType(decl, srcType);
+    		    
+                for(AbsVarDecl todo : todoTypes) {
+                    if(todo.name == decl.name) {
+                        SemDesc.setActualType(todo, srcType);
+                        SemDesc.setActualType(todo.name, srcType);
+                        SemDesc.setActualType(todo.type, srcType);
+                    }
+                }
+    		    
+
+		        //SemType type = SemDesc.getActualType(acceptor.type);
+                //if(type!=null) SemDesc.setActualType(acceptor, type);
+		        //if(type==null) Error("Unknown type", acceptor);
+
+		    } else {
+		        Error("unknown types, values or variables", acceptor);
+		        return;
+		    }
+	    } else if(dstType instanceof SemSubprogramType) {
 		    SemType returnType = ((SemSubprogramType)dstType).getResultType();
 		    if(!returnType.coercesTo(srcType)) {
     		    Error("incompatible return type", acceptor);
 		    } else {
 		        //dstType = returnType;
 		    }
-		} else if(!dstType.coercesTo(srcType)) 
+		} else if(!dstType.coercesTo(srcType)) {
 		    Error("incompatible types", acceptor);
-	    else if(!(dstType instanceof SemAtomType || dstType instanceof SemPointerType))
+	    } else if(!(dstType instanceof SemAtomType || dstType instanceof SemPointerType)) {
 		    Error("invalid left type", acceptor);
+	    }
 	}
 
 	@Override
@@ -343,9 +365,15 @@ public class SemTypeChecker implements AbsVisitor {
 		if(type!=null) SemDesc.setActualType(acceptor, type);
 	}
 
+    ArrayList<AbsVarDecl> todoTypes = new ArrayList<AbsVarDecl>();
 	@Override
 	public void visit(AbsVarDecl acceptor) {
 		acceptor.type.accept(this);
+		if(acceptor.type instanceof AbsAtomType && ((AbsAtomType)acceptor.type).type == AbsAtomType.AUTO) {
+            todoTypes.add(acceptor);
+		    return;
+	    }
+		
 		SemType type = SemDesc.getActualType(acceptor.type);
         if(type!=null) SemDesc.setActualType(acceptor, type);
 		if(type==null) Error("Unknown type", acceptor);
@@ -357,7 +385,7 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsWhileStmt acceptor) {
-	    acceptor.cond.accept(this);//maybe typecheck this? :)
+	    acceptor.cond.accept(this);
 	    acceptor.stmt.accept(this);
 	}
 

@@ -57,11 +57,12 @@ import compiler.synanal.*;
 
 // ce bom razvil se kak dodaten feature :)
 "{$EXTENDED}" { System.out.println(":-) Using extended features."); extendedPascal = true; return sym(PascalTok.EXTENDED); }
-"auto"  { if(extendedPascal) return sym(PascalTok.AUTO);  else return sym(PascalTok.IDENTIFIER); }
+//"auto"  { if(extendedPascal) return sym(PascalTok.AUTO);  else return sym(PascalTok.IDENTIFIER); }
 "case"  { if(extendedPascal) return sym(PascalTok.CASE);  else return sym(PascalTok.IDENTIFIER); }
 "goto"  { if(extendedPascal) return sym(PascalTok.GOTO);  else return sym(PascalTok.IDENTIFIER); }
 "label" { if(extendedPascal) return sym(PascalTok.LABEL); else return sym(PascalTok.IDENTIFIER); }
 //"mod"   { if(extendedPascal) return sym(PascalTok.MOD);   else return sym(PascalTok.IDENTIFIER); }
+"auto"  { return sym(PascalTok.AUTO); }
 "mod"   { return sym(PascalTok.MOD); }
 "xor"   { return sym(PascalTok.XOR); }
 "repeat" { return sym(PascalTok.REPEAT); }
