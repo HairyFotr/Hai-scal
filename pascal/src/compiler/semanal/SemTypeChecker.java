@@ -118,7 +118,7 @@ public class SemTypeChecker implements AbsVisitor {
                     else 
                         throw new Exception();
                     break;
-                case AbsBinExpr.AND:case AbsBinExpr.OR:
+                case AbsBinExpr.AND:case AbsBinExpr.OR:case AbsBinExpr.XOR:
                     if(fstType.coercesTo(sndType) && ((SemAtomType)fstType).type==SemAtomType.BOOL)
     	                SemDesc.setActualType(acceptor, new SemAtomType(SemAtomType.BOOL));
                     else 

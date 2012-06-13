@@ -16,8 +16,10 @@ public class SystemStubs {
 		genProcedure("putch",SemAtomType.CHAR);
 		genProcedure("putnl");
 		genProcedure("putint",SemAtomType.INT);
+		genProcedure("putbool",SemAtomType.BOOL);
 		genFunction(SemAtomType.CHAR,"getch");
 		genFunction(SemAtomType.INT,"getint");
+		genFunction(SemAtomType.INT,"getbool");
 		genFunction(SemAtomType.INT,"ord",SemAtomType.CHAR);
 		genFunction(SemAtomType.CHAR,"chr",SemAtomType.INT);
 

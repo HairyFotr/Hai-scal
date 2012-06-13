@@ -26,7 +26,7 @@ terminal String IDENTIFIER;
 terminal String BOOL, CHAR, INT;
 
 terminal String COLON, COMMA, DOT, DOTS, LBRACKET, LPARENTHESIS, RBRACKET, RPARENTHESIS, SEMIC;
-terminal String ADD, AND, DIV, EQU, GEQ, GTH, LEQ, LTH, MEM, MUL, MOD, NEQ, NOT, OR, PTR, SUB, UADD, USUB, VAL;
+terminal String ADD, AND, DIV, EQU, GEQ, GTH, LEQ, LTH, MEM, MUL, MOD, NEQ, NOT, OR, PTR, SUB, UADD, USUB, VAL, XOR;
 terminal String ARRAY, ASSIGN, BEGIN, CONST, DO, ELSE, END, FOR, FUNCTION, IF, OF, PROCEDURE, PROGRAM, RECORD, THEN, TO, TYPE, VAR, WHILE;
 
 non terminal AbsTree source;
@@ -72,6 +72,7 @@ precedence left LBRACKET,RBRACKET;
 */
 precedence left AND;
 precedence left OR;
+precedence left XOR;
 precedence left EQU, NEQ;
 precedence left GTH, LTH, GEQ, LEQ;
 precedence left ADD, SUB;
@@ -137,7 +138,8 @@ constdec_opt ::=
         LBRACKET:l type:t RBRACKET:r {: RESULT = (new AbsAlloc((AbsTypeExpr)t)).setBeg(l,lleft,lright).setEnd(r,rleft,rright); :} |
         LPARENTHESIS value:v RPARENTHESIS {: RESULT = (AbsValExpr)v; :} |
         IDENTIFIER:id {: RESULT = (new AbsValName(id)).setPos(id,idleft,idright); :} |
-        value:v1 MOD value:v2 {: RESULT = (new AbsBinExpr(AbsBinExpr.MOD, (AbsValExpr)v1, (AbsValExpr)v2)).setBegEnd(v1,v2); :};
+        value:v1 MOD value:v2 {: RESULT = (new AbsBinExpr(AbsBinExpr.MOD, (AbsValExpr)v1, (AbsValExpr)v2)).setBegEnd(v1,v2); :} |
+        value:v1 XOR value:v2 {: RESULT = (new AbsBinExpr(AbsBinExpr.XOR, (AbsValExpr)v1, (AbsValExpr)v2)).setBegEnd(v1,v2); :};
         //value MOD value;//Ext
         
 parameters_call ::= LPARENTHESIS value_list:vals RPARENTHESIS {: RESULT = (AbsValExprs)vals; :};

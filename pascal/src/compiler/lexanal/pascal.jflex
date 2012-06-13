@@ -64,6 +64,7 @@ import compiler.synanal.*;
 "label" { if(extendedPascal) return sym(PascalTok.LABEL); else return sym(PascalTok.IDENTIFIER); }
 //"mod"   { if(extendedPascal) return sym(PascalTok.MOD);   else return sym(PascalTok.IDENTIFIER); }
 "mod"   { return sym(PascalTok.MOD); }
+"xor"   { return sym(PascalTok.XOR); }
 
 [/][/].*?[\n] { }
 "{" { commentNesting++; yybegin(COMMENT); }

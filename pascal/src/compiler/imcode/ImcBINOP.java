@@ -17,6 +17,7 @@ public class ImcBINOP extends ImcExpr {
 	public static final int AND = 10;
 	public static final int OR  = 11;
 	public static final int MOD = 14;
+	public static final int XOR = 15;
 
 	/** Operator.  */
 	public int op;

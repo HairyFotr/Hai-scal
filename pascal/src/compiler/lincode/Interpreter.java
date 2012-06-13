@@ -64,18 +64,19 @@ public class Interpreter {
 		if (label.equals("_free")) {
 			return 0;
 		}
-		if (label.equals("_getch")) {
-			return (int)(new Scanner(System.in)).next().charAt(0);
-		}
-		if (label.equals("_getint")) {
-			return (new Scanner(System.in)).nextInt();
-		}
+		if (label.equals("_getch")) return (int)(new Scanner(System.in)).next().charAt(0);
+		if (label.equals("_getint")) return (new Scanner(System.in)).nextInt();
+		if (label.equals("_getbool")) return (new Scanner(System.in)).nextBoolean() ? 1 : 0;
 		if (label.equals("_putch")) {
 			System.out.print((char)(LD(SP + 4)).byteValue());
 			return 0;
 		}
 		if (label.equals("_putint")) {
 			System.out.print(LD(SP + 4));
+			return 0;
+		}
+		if (label.equals("_putbool")) {
+			System.out.print(LD(SP + 4)==0?"false":"true");
 			return 0;
 		}
 		if (label.equals("_putnl")) {
@@ -186,6 +187,7 @@ public class Interpreter {
 			case ImcBINOP.GEQ: return (lval >= rval ? 1 : 0);
 			case ImcBINOP.AND: return lval * rval;
 			case ImcBINOP.OR : return (lval + rval > 0 ? 1 :0);
+			case ImcBINOP.XOR: return (lval!=rval ? 1 : 0);
 			}
 		}
 		if (expr instanceof ImcCALL) {
