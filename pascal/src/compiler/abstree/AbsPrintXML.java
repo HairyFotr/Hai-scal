@@ -351,4 +351,11 @@ public class AbsPrintXML implements AbsVisitor {
 		xml.print("</absnode>\n");
 	}
 
+	public void visit(AbsRepeatStmt acceptor) {
+		if (acceptor.error) { xml.println("<abserror kind=\"RepeatStmt\"/>"); return; }
+		xml.print("<absnode " + printPos(acceptor) + " kind=\"RepeatStmt\">");
+		acceptor.cond.accept(this);
+		acceptor.stmts.accept(this);
+		xml.print("</absnode>\n");
+	}
 }

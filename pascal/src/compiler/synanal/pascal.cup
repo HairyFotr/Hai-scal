@@ -29,6 +29,9 @@ terminal String COLON, COMMA, DOT, DOTS, LBRACKET, LPARENTHESIS, RBRACKET, RPARE
 terminal String ADD, AND, DIV, EQU, GEQ, GTH, LEQ, LTH, MEM, MUL, MOD, NEQ, NOT, OR, PTR, SUB, UADD, USUB, VAL, XOR;
 terminal String ARRAY, ASSIGN, BEGIN, CONST, DO, ELSE, END, FOR, FUNCTION, IF, OF, PROCEDURE, PROGRAM, RECORD, THEN, TO, TYPE, VAR, WHILE;
 
+terminal String REPEAT, UNTIL;
+
+
 non terminal AbsTree source;
 non terminal AbsTree program;
 non terminal AbsTree constdec_opt, typedec_opt, vardec_opt, funcproc_opt, main_block;
@@ -262,6 +265,7 @@ statement ::=
     IF:i value:cond THEN statement:stmt ELSE statement:stmtelse 
         {: RESULT = (new AbsIfStmt((AbsValExpr)cond, (AbsStmt)stmt, (AbsStmt)stmtelse)).setBeg(i,ileft,iright).setEnd(stmtelse); :} |
     WHILE:w value:cond DO statement:stmt {: RESULT = (new AbsWhileStmt((AbsValExpr)cond, (AbsStmt)stmt)).setBeg(w,wleft,wright).setEnd(stmt); :} |
+    REPEAT:r statements_opt:stmts UNTIL value:cond {: RESULT = (new AbsRepeatStmt((AbsValExpr)cond, (AbsStmts)stmts)).setBeg(r,rleft,rright).setEnd(stmts); :} |
     FOR:f IDENTIFIER:id ASSIGN value:lo TO value:hi DO statement:stmt 
         {: RESULT = (new AbsForStmt((AbsValName)(new AbsValName(id)).setPos(id,idleft,idright), (AbsValExpr)lo, (AbsValExpr)hi, (AbsStmt)stmt)).setBeg(f,fleft,fright).setEnd(stmt); :} |
     CASE value OF | //Ext

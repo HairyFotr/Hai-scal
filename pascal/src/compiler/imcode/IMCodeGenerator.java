@@ -332,9 +332,44 @@ public class IMCodeGenerator implements AbsVisitor {
     }
 
     public void visit(AbsWhileStmt acceptor) {
+        ImcSEQ seq = new ImcSEQ();
+        
         acceptor.cond.accept(this);
-        acceptor.stmt.accept(this);
+        ImcExpr cond = (ImcExpr)code;
+        
+        ImcLABEL tl = new ImcLABEL(FrmLabel.newLabel());
+        ImcLABEL fl = new ImcLABEL(FrmLabel.newLabel());
+        ImcLABEL sl = new ImcLABEL(FrmLabel.newLabel());
+        
+        seq.stmts.add(sl);
+        seq.stmts.add(new ImcCJUMP(cond, tl.label, fl.label));
+        seq.stmts.add(tl);
+            acceptor.stmt.accept(this);
+            seq.stmts.add((ImcStmt)code);
+            seq.stmts.add(new ImcJUMP(sl.label));
+        seq.stmts.add(fl);
+        
+        code = seq;
     }
  
+
+    public void visit(AbsRepeatStmt acceptor) {
+        ImcSEQ seq = new ImcSEQ();
+        
+        acceptor.cond.accept(this);
+        ImcExpr cond = (ImcExpr)code;
+        
+        ImcLABEL tl = new ImcLABEL(FrmLabel.newLabel());
+        ImcLABEL fl = new ImcLABEL(FrmLabel.newLabel());
+        ImcLABEL sl = new ImcLABEL(FrmLabel.newLabel());
+        
+        seq.stmts.add(sl);
+            acceptor.stmts.accept(this);
+            seq.stmts.add((ImcStmt)code);
+        seq.stmts.add(new ImcCJUMP(cond, fl.label, sl.label));
+        seq.stmts.add(fl);
+        
+        code = seq;
+    }
 
 }

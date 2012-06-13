@@ -348,7 +348,12 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsWhileStmt acceptor) {
-	    acceptor.cond.accept(this);
+	    acceptor.cond.accept(this);//maybe typecheck this? :)
 	    acceptor.stmt.accept(this);
+	}
+
+	public void visit(AbsRepeatStmt acceptor) {
+	    acceptor.cond.accept(this);
+	    acceptor.stmts.accept(this);
 	}
 }

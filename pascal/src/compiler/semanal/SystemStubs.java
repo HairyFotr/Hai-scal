@@ -44,7 +44,7 @@ public class SystemStubs {
 			SemTable.ins(acceptor.name.name, acceptor);
 			SemDesc.setActualType(acceptor, type);
 		} catch (SemIllegalInsertException e) {
-			System.out.println("error making fake function: "+name);
+			System.out.println("error making stub function: "+name);
 			e.printStackTrace();
 		}
 	}
