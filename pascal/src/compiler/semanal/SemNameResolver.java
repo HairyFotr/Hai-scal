@@ -178,16 +178,21 @@ public class SemNameResolver implements AbsVisitor {
 
 	@Override public void visit(AbsStmts acceptor) { for(AbsStmt stmt : acceptor.stmts) stmt.accept(this); }
 
+	boolean zveliko = false;
 	@Override
 	public void visit(AbsTypeDecl acceptor) {
-        if(!record()) try {
-			SemTable.ins(acceptor.name.name, acceptor);
-		} catch(SemIllegalInsertException e) {
-			Error("redeclaration", acceptor.name);
-		}
+        if(zveliko && acceptor.name.name.toLowerCase().charAt(0)==acceptor.name.name.charAt(0)) {
+            Error("non-capitalized type name", acceptor.name);
+        } else {
+            if(!record()) try {
+		        SemTable.ins(acceptor.name.name, acceptor);
+		    } catch(SemIllegalInsertException e) {
+			    Error("redeclaration", acceptor.name);
+		    }
 		
-		acceptor.type.accept(this);
-		SemDesc.setNameDecl(acceptor.name, acceptor);
+		    acceptor.type.accept(this);
+		    SemDesc.setNameDecl(acceptor.name, acceptor);
+	    }
 	}
 
 	@Override
@@ -248,4 +253,11 @@ public class SemNameResolver implements AbsVisitor {
 	    acceptor.cond.accept(this);
 	    acceptor.stmts.accept(this);
 	}
+
+	@Override
+	public void visit(AbsReturn acceptor) {
+	    if(acceptor.expr != null)
+    	    acceptor.expr.accept(this);
+	}
+
 }

@@ -64,7 +64,7 @@ public class Interpreter {
 		if (label.equals("_free")) {
 			return 0;
 		}
-		if (label.equals("_getch")) return (int)(new Scanner(System.in)).next().charAt(0);
+		if (label.equals("_getch")) return compiler.Utils.parseChar("'"+(new Scanner(System.in)).next()+"'");//return (int)(new Scanner(System.in)).next().charAt(0);
 		if (label.equals("_getint")) return (new Scanner(System.in)).nextInt();
 		if (label.equals("_getbool")) return (new Scanner(System.in)).nextBoolean() ? 1 : 0;
 		if (label.equals("_putch")) {
@@ -168,63 +168,69 @@ public class Interpreter {
 
 	public Integer execExpr(ImcExpr expr) {
 		// if (debug == 1) System.err.println(prefix + expr);
-
-		if (expr instanceof ImcBINOP) {
-			ImcBINOP binop = (ImcBINOP)expr;
-			Integer lval = execExpr(binop.limc);
-			Integer rval = execExpr(binop.rimc);
-			switch (binop.op) {
-			case ImcBINOP.ADD: return lval + rval;
-			case ImcBINOP.SUB: return lval - rval;
-			case ImcBINOP.MUL: return lval * rval;
-			case ImcBINOP.DIV: return lval / rval;
-			case ImcBINOP.MOD: return lval % rval;
-			case ImcBINOP.EQU: return (lval == rval ? 1 : 0);
-			case ImcBINOP.NEQ: return (lval != rval ? 1 : 0);
-			case ImcBINOP.LTH: return (lval < rval ? 1 : 0);
-			case ImcBINOP.GTH: return (lval > rval ? 1 : 0);
-			case ImcBINOP.LEQ: return (lval <= rval ? 1 : 0);
-			case ImcBINOP.GEQ: return (lval >= rval ? 1 : 0);
-			case ImcBINOP.AND: return lval * rval;
-			case ImcBINOP.OR : return (lval + rval > 0 ? 1 :0);
-			case ImcBINOP.XOR: return (lval!=rval ? 1 : 0);
-			}
-		}
-		if (expr instanceof ImcCALL) {
-			ImcCALL call = (ImcCALL)expr;
-			int offset = 0;
-			for (int a = 0; a < call.args.size(); a++) {
-				Integer v = execExpr(call.args.get(a));
-				if (call.size.get(a) == 4) {
-					ST(SP + 4 * offset, v);
-					offset = offset + 1;
-				} else {
-					for (int d = 0; d < call.size.get(a) / 4; d++) {
-						Integer dv = LD(v + 4 * d);
-						ST(SP + 4 * offset, dv);
-						offset = offset + 1;
-					}
-				}
-			}
-			prefix = prefix + "  ";
-			Integer result = execFun(call.label.name());
-			prefix = prefix.substring(2);
-			return result;
-		}
-		if (expr instanceof ImcCONST) {
-			return ((ImcCONST)expr).value;
-		}
-		if (expr instanceof ImcMEM) {
-			return LD(execExpr(((ImcMEM)expr).expr));
-		}
-		if (expr instanceof ImcNAME) {
-			return labels.get(((ImcNAME)expr).label.name());
-		}
-		if (expr instanceof ImcTEMP) {
-			return LD(((ImcTEMP)expr).temp);
-		}
-		Report.error("Unknown expression: " + expr, 0);
-		return null;
+        try {
+		    if (expr instanceof ImcBINOP) {
+			    ImcBINOP binop = (ImcBINOP)expr;
+			    Integer lval = execExpr(binop.limc);
+			    Integer rval = execExpr(binop.rimc);
+			    switch (binop.op) {
+			    case ImcBINOP.ADD: return lval + rval;
+			    case ImcBINOP.SUB: return lval - rval;
+			    case ImcBINOP.MUL: return lval * rval;
+			    case ImcBINOP.DIV: return lval / rval;
+			    case ImcBINOP.MOD: return lval % rval;
+			    case ImcBINOP.EQU: return (lval == rval ? 1 : 0);
+			    case ImcBINOP.NEQ: return (lval != rval ? 1 : 0);
+			    case ImcBINOP.LTH: return (lval < rval ? 1 : 0);
+			    case ImcBINOP.GTH: return (lval > rval ? 1 : 0);
+			    case ImcBINOP.LEQ: return (lval <= rval ? 1 : 0);
+			    case ImcBINOP.GEQ: return (lval >= rval ? 1 : 0);
+			    case ImcBINOP.AND: return lval * rval;
+			    case ImcBINOP.OR : return (lval + rval > 0 ? 1 :0);
+			    case ImcBINOP.XOR: return (lval != rval ? 1 : 0);
+			    }
+		    }
+		    if (expr instanceof ImcCALL) {
+			    ImcCALL call = (ImcCALL)expr;
+			    int offset = 0;
+			    for (int a = 0; a < call.args.size(); a++) {
+				    Integer v = execExpr(call.args.get(a));
+				    if (call.size.get(a) == 4) {
+					    ST(SP + 4 * offset, v);
+					    offset = offset + 1;
+				    } else {
+					    for (int d = 0; d < call.size.get(a) / 4; d++) {
+						    Integer dv = LD(v + 4 * d);
+						    ST(SP + 4 * offset, dv);
+						    offset = offset + 1;
+					    }
+				    }
+			    }
+			    prefix = prefix + "  ";
+			    Integer result = execFun(call.label.name());
+			    prefix = prefix.substring(2);
+			    return result;
+		    }
+		    if (expr instanceof ImcCONST) {
+			    return ((ImcCONST)expr).value;
+		    }
+		    if (expr instanceof ImcMEM) {
+			    return LD(execExpr(((ImcMEM)expr).expr));
+		    }
+		    if (expr instanceof ImcNAME) {
+			    return labels.get(((ImcNAME)expr).label.name());
+		    }
+		    if (expr instanceof ImcTEMP) {
+			    return LD(((ImcTEMP)expr).temp);
+		    }
+		    Report.error("Unknown expression: " + expr, 0);
+		    return null;
+	    } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println("Error in line: "+expr.currline);
+			Report.error("Exception in program.", 0);
+	    }
+	    return null;
 	}
 
 	public Integer LD(Integer addr) {

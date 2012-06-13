@@ -9,6 +9,7 @@ public class ImcMEM extends ImcExpr {
 
 	public ImcMEM(ImcExpr expr) {
 		this.expr = expr;
+        currline = IMCodeGenerator.currline;
 	}
 
 	@Override

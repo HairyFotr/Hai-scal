@@ -11,6 +11,7 @@ public class ImcNAME extends ImcExpr {
 
 	public ImcNAME(FrmLabel label) {
 		this.label = label;
+        currline = IMCodeGenerator.currline;
 	}
 
 	@Override

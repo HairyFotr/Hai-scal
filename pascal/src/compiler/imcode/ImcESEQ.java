@@ -13,6 +13,7 @@ public class ImcESEQ extends ImcExpr {
 	public ImcESEQ(ImcStmt stmt, ImcExpr expr) {
 		this.stmt = stmt;
 		this.expr = expr;
+        currline = IMCodeGenerator.currline;
 	}
 
 	@Override

@@ -20,6 +20,7 @@ public class ImcCALL extends ImcExpr {
 		this.label = label;
 		this.args = new LinkedList<ImcExpr>();
 		this.size = new LinkedList<Integer>();
+        currline = IMCodeGenerator.currline;
 	}
 
 	@Override

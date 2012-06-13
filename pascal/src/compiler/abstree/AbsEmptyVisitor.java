@@ -178,4 +178,10 @@ public class AbsEmptyVisitor implements AbsVisitor {
 		Thread.dumpStack();
 		Report.error("Unimplemented visitor method.", 1);
 	}
+
+	@Override
+	public void visit(AbsReturn acceptor) {
+		Thread.dumpStack();
+		Report.error("Unimplemented visitor method.", 1);
+	}
 }

@@ -54,7 +54,6 @@ import compiler.synanal.*;
 <YYINITIAL> {
 [ \n\t\r]+ { }
 
-''''|'[^']' { return sym(PascalTok.CHAR_CONST); }
 
 // ce bom razvil se kak dodaten feature :)
 "{$EXTENDED}" { System.out.println(":-) Using extended features."); extendedPascal = true; return sym(PascalTok.EXTENDED); }
@@ -67,10 +66,13 @@ import compiler.synanal.*;
 "xor"   { return sym(PascalTok.XOR); }
 "repeat" { return sym(PascalTok.REPEAT); }
 "until" { return sym(PascalTok.UNTIL); }
+"return" { return sym(PascalTok.RETURN); }
 
 [/][/].*?[\n] { }
 "{" { commentNesting++; yybegin(COMMENT); }
 
+//''''|'[^']' { return sym(PascalTok.CHAR_CONST); }
+''''|'[^']'|'[0-9]{1,3}d'|'[0-9A-Fa-f]{1,2}h' { return sym(PascalTok.CHAR_CONST); }
 "true"|"false" { return sym(PascalTok.BOOL_CONST); }
 [0-9]+ { return sym(PascalTok.INT_CONST); }
 "nil"  { return sym(PascalTok.NIL); }
@@ -107,7 +109,8 @@ import compiler.synanal.*;
 "function"  { return sym(PascalTok.FUNCTION); }
 "program"   { return sym(PascalTok.PROGRAM); }
 
-[a-zA-Z][a-zA-Z0-9_]* { return sym(PascalTok.IDENTIFIER); }
+//[a-zA-Z][a-zA-Z0-9_]* { return sym(PascalTok.IDENTIFIER); }
+[a-zA-Z_][a-zA-Z0-9_]* { return sym(PascalTok.IDENTIFIER); }
 
 ":"  { return sym(PascalTok.COLON); }
 ","  { return sym(PascalTok.COMMA); }

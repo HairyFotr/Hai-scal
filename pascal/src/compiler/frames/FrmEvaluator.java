@@ -169,4 +169,11 @@ public class FrmEvaluator implements AbsVisitor {
         acceptor.cond.accept(this);
         acceptor.stmts.accept(this);
     }
+    
+	@Override
+	public void visit(AbsReturn acceptor) {
+	    if(acceptor.expr != null)
+    	    acceptor.expr.accept(this);
+	}
+    
 }

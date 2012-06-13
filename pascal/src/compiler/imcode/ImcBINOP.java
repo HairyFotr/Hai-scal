@@ -32,6 +32,7 @@ public class ImcBINOP extends ImcExpr {
 		this.op = op;
 		this.limc = limc;
 		this.rimc = rimc;
+        currline = IMCodeGenerator.currline;
 	}
 
 	@Override

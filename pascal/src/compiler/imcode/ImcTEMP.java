@@ -11,6 +11,7 @@ public class ImcTEMP extends ImcExpr {
 
 	public ImcTEMP(FrmTemp temp) {
 		this.temp = temp;
+        currline = IMCodeGenerator.currline;
 	}
 
 	@Override

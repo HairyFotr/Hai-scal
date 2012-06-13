@@ -14,6 +14,9 @@ public class SemTypeChecker implements AbsVisitor {
     public int errors = 0;
     private String name = "Typechecker";
     
+    private boolean inProc = false;
+    private boolean inFunc = false;
+    
     public void Error(String s, AbsTree abs) {
         System.out.println((++errors)+": " + name  + ": "+s+" at: "+abs.begLine+","+abs.begColumn);
         error = true;
@@ -213,6 +216,8 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsFunDecl acceptor) {
+	    boolean block = inFunc;
+	    inFunc = true;
         acceptor.pars.accept(this);
         acceptor.type.accept(this);
         acceptor.decls.accept(this);
@@ -221,6 +226,7 @@ public class SemTypeChecker implements AbsVisitor {
         for(AbsDecl decl : acceptor.pars.decls) funType.addParType(SemDesc.getActualType(decl));//parameter types
 		SemDesc.setActualType(acceptor, funType);
         acceptor.stmt.accept(this);
+	    if(!block) inFunc = false;
     }
 
 	@Override
@@ -243,6 +249,8 @@ public class SemTypeChecker implements AbsVisitor {
 
 	@Override
 	public void visit(AbsProcDecl acceptor) {
+	    boolean block = inProc;
+	    inProc = true;
         acceptor.pars.accept(this);
         acceptor.decls.accept(this);
 
@@ -250,6 +258,7 @@ public class SemTypeChecker implements AbsVisitor {
         for(AbsDecl decl : acceptor.pars.decls) procType.addParType(SemDesc.getActualType(decl));//parameter types
 		SemDesc.setActualType(acceptor, procType);
         acceptor.stmt.accept(this);
+	    if(!block) inProc = false;
 	}
 
 	@Override
@@ -355,5 +364,15 @@ public class SemTypeChecker implements AbsVisitor {
 	public void visit(AbsRepeatStmt acceptor) {
 	    acceptor.cond.accept(this);
 	    acceptor.stmts.accept(this);
+	}
+	
+	@Override
+	public void visit(AbsReturn acceptor) {
+	    if(inProc && acceptor.expr == null)
+    	    return;
+	    else if(inFunc && acceptor.expr != null)
+    	    acceptor.expr.accept(this);
+	    else
+	        Error("Illegal return (the police are on their way)", acceptor);
 	}
 }

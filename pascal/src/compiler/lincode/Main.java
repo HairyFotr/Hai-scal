@@ -35,6 +35,7 @@ public class Main {
 		try {
 			program = (AbsProgram) (parser.parse().value);
 		} catch (Exception ex) {
+		    ex.printStackTrace();
 			Report.error("Uncaught syntax error.", 1);
 		}
 		SemNameResolver nameResolver = new SemNameResolver();

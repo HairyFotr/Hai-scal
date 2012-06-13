@@ -33,5 +33,6 @@ public interface AbsVisitor {
 	public void visit(AbsVarDecl acceptor);
 	public void visit(AbsWhileStmt acceptor);
 	public void visit(AbsRepeatStmt acceptor);
+	public void visit(AbsReturn acceptor);
 
 }
