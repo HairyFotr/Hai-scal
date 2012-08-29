@@ -27,8 +27,13 @@ public class ImcSEQ extends ImcStmt {
 	public ImcSEQ linear() {
 		ImcSEQ lin = new ImcSEQ();
 		Iterator<ImcStmt> stmts = this.stmts.iterator();
-		while (stmts.hasNext()) {
+		int limiter = 5000;
+		while (stmts.hasNext() && limiter>0) {
 			ImcStmt stmt = stmts.next();
+			if(stmt==null) {
+			    limiter--;
+			    continue;
+		    }
 			ImcSEQ linStmt = stmt.linear();
 			lin.stmts.addAll(linStmt.stmts);
 		}
