@@ -7,7 +7,8 @@ import compiler.semanal.*;
 public class FrmEvaluator implements AbsVisitor {
 
     boolean funcCall = false;
-    int sizeArgs = 0;
+    FrmFrame currFrame = null;
+    //int sizeArgs = 0;
     
     public boolean error = false;
     public int errors = 0;
@@ -17,7 +18,7 @@ public class FrmEvaluator implements AbsVisitor {
         System.out.println((++errors)+": " + name  + ": "+s+" at: "+abs.begLine+","+abs.begColumn);
         error = true;
     }
-
+    
     public void visit(AbsAtomType acceptor) {}
     
     public void visit(AbsConstDecl acceptor) {}
@@ -30,6 +31,7 @@ public class FrmEvaluator implements AbsVisitor {
                 FrmArgAccess access = new FrmArgAccess(varDecl, frame);
                 FrmDesc.setAccess(varDecl, access);
             }
+            decl.accept(this);
         }
         for (AbsDecl decl : acceptor.decls.decls) {
             if (decl instanceof AbsVarDecl) {        
@@ -40,17 +42,18 @@ public class FrmEvaluator implements AbsVisitor {
             }
             decl.accept(this);
         }
-        sizeArgs = 0;
+        currFrame = frame;
+        currFrame.sizeArgs = 4;
         funcCall = false;
         acceptor.stmt.accept(this);
-        frame.sizeArgs = sizeArgs;
-        if(funcCall) frame.sizeArgs += 4;
+        //frame.sizeArgs = sizeArgs;
+        if(funcCall) currFrame.sizeArgs += 4;
         
         FrmDesc.setFrame(acceptor, frame);
     }
     
     public void visit(AbsProgram acceptor) {
-        FrmFrame frame = new FrmFrame(acceptor, 1);
+        FrmFrame frame = new FrmFrame(acceptor, -1);
         for (AbsDecl decl : acceptor.decls.decls) {
             if (decl instanceof AbsVarDecl) {
                 AbsVarDecl varDecl = (AbsVarDecl)decl;
@@ -59,11 +62,11 @@ public class FrmEvaluator implements AbsVisitor {
             }
             decl.accept(this);
         }
-        sizeArgs = 0;
+        currFrame = frame;
         funcCall = false;
         acceptor.stmt.accept(this);//main
-        frame.sizeArgs = sizeArgs;
-        if(funcCall) frame.sizeArgs += 4;
+        //frame.sizeArgs = sizeArgs;
+        if(funcCall) currFrame.sizeArgs += 4;
         
         FrmDesc.setFrame(acceptor, frame);
     }
@@ -86,11 +89,12 @@ public class FrmEvaluator implements AbsVisitor {
             }
             decl.accept(this);
         }
-        sizeArgs = 0;
+        currFrame = frame;
+        currFrame.sizeArgs = 4;
         funcCall = false;
         acceptor.stmt.accept(this);
-        frame.sizeArgs = sizeArgs;
-        if(funcCall) frame.sizeArgs += 4;
+        ///*frame.sizeArgs = sizeArgs;
+        if(funcCall) currFrame.sizeArgs += 4;
         
         FrmDesc.setFrame(acceptor, frame);
     }
@@ -136,9 +140,11 @@ public class FrmEvaluator implements AbsVisitor {
         for(AbsValExpr expr : acceptor.args.exprs) try {
             callSize += SemDesc.getActualType(expr).size();
         } catch(NullPointerException e) {
-            Error("type inference failed", acceptor);
+            //Error("type inference failed", acceptor);
         }
-        if(callSize > sizeArgs) sizeArgs = callSize;        
+
+		if(currFrame.sizeArgs < callSize)
+			currFrame.sizeArgs = callSize;
     }
 
     public void visit(AbsDeclName acceptor) {}
